@@ -116,10 +116,10 @@ public class BluetoothChatFragment extends Fragment {
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
             // Otherwise, setup the chat session
         }
-        else if (mChatService == null) {
+        else if (mChatService == null)
             setupChat();
 
-        }
+
     }
 
     @Override
@@ -141,12 +141,16 @@ public class BluetoothChatFragment extends Fragment {
         if (mChatService != null) {
 
             // Only if the state is STATE_NONE, do we know that we haven't started already
+            //Toast.makeText(getActivity(), mChatService.getState()+"", Toast.LENGTH_LONG).show();
             if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
                 setupChat();
                 // Start the Bluetooth chat services
                 mChatService.start();
                 //setupChat();
             }
+        }
+        else {
+            setupChat();
         }
 
 
