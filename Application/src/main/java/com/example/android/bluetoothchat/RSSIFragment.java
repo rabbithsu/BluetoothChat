@@ -74,7 +74,7 @@ public class RSSIFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        getActivity().unregisterReceiver(receiver);
     }
 
     @Override

@@ -92,12 +92,18 @@ public class BluetoothChatFragment extends Fragment {
      */
     private BluetoothChatService mChatService = null;
 
+    //auto
+    ArrayList<BluetoothDevice> device = new ArrayList<BluetoothDevice>();
+    boolean lock;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         // Get local Bluetooth adapter
-
+        lock = false;
+        getActivity().registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        getActivity().registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
@@ -131,8 +137,7 @@ public class BluetoothChatFragment extends Fragment {
         if (mChatService != null) {
             mChatService.stop();
         }
-        //if (mBluetoothAdapter.isEnabled())
-        //    mBluetoothAdapter.disable();
+        getActivity().unregisterReceiver(receiver);
     }
 
     @Override
@@ -215,11 +220,10 @@ public class BluetoothChatFragment extends Fragment {
         mOutStringBuffer = new StringBuffer("");
 
         //try auto
-        getActivity().registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        if (mBluetoothAdapter.isDiscovering()) {
-            mBluetoothAdapter.cancelDiscovery();
-        }
-        mBluetoothAdapter.startDiscovery();
+        //Toast.makeText(getActivity(), "Start try.", Toast.LENGTH_SHORT).show();
+        doDiscovery();
+
+
     }
 
     /**
@@ -446,12 +450,55 @@ public class BluetoothChatFragment extends Fragment {
     private final BroadcastReceiver receiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent) {
-
             String action = intent.getAction();
+            //Toast.makeText(getActivity(), "Receive.", Toast.LENGTH_SHORT).show();
             if(BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                mChatService.connect(device, false);
+                //Toast.makeText(getActivity(), "Add.", Toast.LENGTH_SHORT).show();
+                BluetoothDevice aaa = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                device.add(aaa);
             }
+            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                //Toast.makeText(getActivity(), "Finish.", Toast.LENGTH_SHORT).show();
+                if (!lock) {
+                    lock = true;
+                    if(device.isEmpty()) {
+                        lock = false;
+                    }
+                    else {
+                        Autoconnect();
+                    }
+                }
+            }
+
         }
     };
+    private void Autoconnect() {
+        //Toast.makeText(getActivity(), "In auto.", Toast.LENGTH_SHORT).show();
+        if (device.isEmpty()){
+            lock = false;
+        }
+        else {
+            while (!device.isEmpty()) {
+
+                if (mChatService.Autoconnect(device.remove(0), false)){
+                    //Toast.makeText(getActivity(), "break.", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                else {
+                    //Toast.makeText(getActivity(), "Fail.", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+            device.clear();
+            lock = false;
+        }
+    }
+    private void doDiscovery(){
+        if (mBluetoothAdapter.isDiscovering()) {
+            mBluetoothAdapter.cancelDiscovery();
+        }
+        mBluetoothAdapter.startDiscovery();
+    }
+
+
 }
