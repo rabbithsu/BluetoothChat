@@ -427,11 +427,12 @@ public class BluetoothChatService {
                     Log.e(TAG, "unable to close() " + mSocketType +
                             " socket during connection failure", e2);
                 }
-                connectionFailed();
+
                 //result auto false
                 result = false;
                 done = true;
 
+                connectionFailed();
                 return;
             }
             //result auto true
@@ -558,6 +559,8 @@ public class BluetoothChatService {
         }
         return mConnectThread.result;
     }
-
+    public void failed(){
+        connectionFailed();
+    }
 
 }

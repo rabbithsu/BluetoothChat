@@ -2,39 +2,39 @@
 <items version="2" >
 
     <item
-        jar="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\exploded-aar\com.android.support\cardview-v7\21.0.2\jars\classes.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="b017100da14f9c158c9f5f2f508333c224b24a7c">
-        <dex dex="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\pre-dexed\debug\classes-f5b0ac7c7890e4b23428307a9578a1b0a02e01cd.jar" />
-    </item>
-    <item
-        jar="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\exploded-aar\com.android.support\gridlayout-v7\21.0.2\jars\classes.jar"
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/gridlayout-v7/21.0.2/jars/classes.jar"
         jumboMode="false"
         revision="22.0.1"
         sha1="9742ced04aafd9ac97dd2c66c1aa0e32d2ae7e54">
-        <dex dex="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\pre-dexed\debug\classes-50e7b3f811f65487b4607cd8b158a402fee911d6.jar" />
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f10f955d57929183ec09956f690dba700276925f.jar" />
     </item>
     <item
-        jar="C:\Users\Rabbit徐\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\21.0.2\support-annotations-21.0.2.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="99373741f99a0556ee293c41e8faa1ca3ae8a4e6">
-        <dex dex="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\pre-dexed\debug\support-annotations-21.0.2-e9dc15bfdea4f49b3006c56e1947fd3956647654.jar" />
-    </item>
-    <item
-        jar="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.2\jars\libs\internal_impl-21.0.2.jar"
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.2/jars/libs/internal_impl-21.0.2.jar"
         jumboMode="false"
         revision="22.0.1"
         sha1="962e8b12569c56dbdcf8367eb4eac8bb129cd18f">
-        <dex dex="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\pre-dexed\debug\internal_impl-21.0.2-fcfc6f47fee6eb1dd8943411ed49256182c1f1b3.jar" />
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/internal_impl-21.0.2-1ca0608582e3433eb73b28bfc25fe6b252e2dc7a.jar" />
     </item>
     <item
-        jar="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.2\jars\classes.jar"
+        jar="/Users/nccu_dct/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/21.0.2/support-annotations-21.0.2.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="99373741f99a0556ee293c41e8faa1ca3ae8a4e6">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/support-annotations-21.0.2-6dc3faa798a5f82f91231e44ddbf17750c8f03b4.jar" />
+    </item>
+    <item
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/cardview-v7/21.0.2/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="b017100da14f9c158c9f5f2f508333c224b24a7c">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f13417554485b4a67f04aecd4ff65247eb3c7d31.jar" />
+    </item>
+    <item
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.2/jars/classes.jar"
         jumboMode="false"
         revision="22.0.1"
         sha1="d1bf02de1c56d942e7a9d093b8610ba1ef4128e3">
-        <dex dex="C:\Users\Rabbit徐\AndroidStudioProjects\BluetoothChat\Application\build\intermediates\pre-dexed\debug\classes-f4845fce130fa68b3240e3dffec9caf1342896a2.jar" />
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-08b0bc052314cffe4e0fb5c9e614d0b8a516b9b4.jar" />
     </item>
 
 </items>
