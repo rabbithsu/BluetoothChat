@@ -102,9 +102,10 @@ public class BluetoothChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         // Get local Bluetooth adapter
-        lock = false;
+
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
             FragmentActivity activity = getActivity();
@@ -148,17 +149,21 @@ public class BluetoothChatFragment extends Fragment {
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-        getActivity().registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        getActivity().registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+        //getActivity().registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        //getActivity().registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
         if (mChatService != null) {
 
             // Only if the state is STATE_NONE, do we know that we haven't started already
             //Toast.makeText(getActivity(), mChatService.getState()+"", Toast.LENGTH_LONG).show();
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+            /*if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
                 // Start the Bluetooth chat services
-                mChatService.start();
-                //setupChat();
-            }
+                //mChatService.start();
+                mChatService = null;
+                setupChat();
+            }*/
+            mChatService = null;
+            setupChat();
+
         }
         else {
             setupChat();
@@ -169,13 +174,25 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        if(mChatService != null)
+        device.clear();
+        if(mChatService != null) {
             mChatService.stop();
+            mChatService=null;
+        }
     }
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().unregisterReceiver(receiver);
+        try {
+            getActivity().unregisterReceiver(receiver);
+        }
+        catch (IllegalArgumentException e){
+
+        }
+        if(mChatService != null) {
+            mChatService.stop();
+            mChatService=null;
+        }
     }
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -460,32 +477,54 @@ public class BluetoothChatFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            //Toast.makeText(getActivity(), "Receive.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Receive.", Toast.LENGTH_SHORT).show();
             if(BluetoothDevice.ACTION_FOUND.equals(action)) {
-                //Toast.makeText(getActivity(), "Add.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Add.", Toast.LENGTH_SHORT).show();
                 BluetoothDevice aaa = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 device.add(aaa);
-                //Toast.makeText(getActivity(), "Added.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Added.", Toast.LENGTH_SHORT).show();
 
             }
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                //Toast.makeText(getActivity(), "Finish.", Toast.LENGTH_SHORT).show();
-                //Toast.makeText(getActivity(), "123.", Toast.LENGTH_SHORT).show();
-                waterchat();
+                Toast.makeText(getActivity(), "Finish.", Toast.LENGTH_SHORT).show();
+                getActivity().unregisterReceiver(receiver);
+                if(!device.isEmpty()){
+                    waterchat();
+                }
+
             }
 
         }
     };
-    private void waterchat() {
-        //Toast.makeText(getActivity(), "In auto.", Toast.LENGTH_SHORT).show();
+    private synchronized void waterchat() {
+        boolean cflag = false;
+        Toast.makeText(getActivity(), "In auto.", Toast.LENGTH_SHORT).show();
         if (device.isEmpty()){
-            lock = false;
+            Toast.makeText(getActivity(), "Empty.", Toast.LENGTH_SHORT).show();
         }
         else {
-            while (!device.isEmpty()) {
+            for(int count = 0; count < device.size(); count++) {
+                Toast.makeText(getActivity(), "Connecting.", Toast.LENGTH_SHORT).show();
+                cflag = mChatService.Autoconnect(device.get(count), false);
+                if(cflag) {
+                    Toast.makeText(getActivity(), "Success.", Toast.LENGTH_SHORT).show();
+                    device.clear();
+                    break;
+                }
+                //mChatService.failed();
+            }
+            Toast.makeText(getActivity(), "Fail.", Toast.LENGTH_SHORT).show();
+            if(!cflag){
+                Toast.makeText(getActivity(), "Set fails.", Toast.LENGTH_SHORT).show();
+                device.clear();
+                mChatService.failed();
+            }
+
+            /*while (!device.isEmpty()) {
 
                 if (mChatService.Autoconnect(device.remove(0), false)){
                     //Toast.makeText(getActivity(), "break.", Toast.LENGTH_SHORT).show();
+                    device.clear();
                     break;
                 }
                 else {
@@ -498,14 +537,16 @@ public class BluetoothChatFragment extends Fragment {
                 }
 
             }
-            device.clear();
-            lock = false;
+            //device.clear();
+            lock = false;*/
         }
     }
     private void doDiscovery(){
         if (mBluetoothAdapter.isDiscovering()) {
             mBluetoothAdapter.cancelDiscovery();
         }
+        getActivity().registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        getActivity().registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
         mBluetoothAdapter.startDiscovery();
     }
 

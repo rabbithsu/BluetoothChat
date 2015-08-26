@@ -60,6 +60,8 @@ public class BluetoothChatService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
+    //
+    private AutoThread mAutothread;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -145,6 +147,10 @@ public class BluetoothChatService {
             if (mConnectThread != null) {
                 mConnectThread.cancel();
                 mConnectThread = null;
+            }
+            if (mAutothread != null) {
+                mAutothread.cancel();
+                mAutothread = null;
             }
         }
 
@@ -377,15 +383,9 @@ public class BluetoothChatService {
         private final BluetoothDevice mmDevice;
         private String mSocketType;
 
-        //auto-result
-        boolean done;
-        boolean result;
 
         public ConnectThread(BluetoothDevice device, boolean secure) {
 
-            //set
-            done = false;
-            result = false;
 
             mmDevice = device;
             BluetoothSocket tmp = null;
@@ -428,16 +428,11 @@ public class BluetoothChatService {
                             " socket during connection failure", e2);
                 }
 
-                //result auto false
-                result = false;
-                done = true;
 
                 connectionFailed();
                 return;
             }
-            //result auto true
-            result = true;
-            done = true;
+
 
             // Reset the ConnectThread because we're done
             synchronized (BluetoothChatService.this) {
@@ -543,24 +538,110 @@ public class BluetoothChatService {
                 mConnectThread.cancel();
                 mConnectThread = null;
             }
+            if (mAutothread != null) {
+                mAutothread.cancel();
+                mAutothread = null;
+            }
+
         }
 
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {
-            mConnectedThread.cancel();
-            mConnectedThread = null;
+            return false;
         }
 
         // Start the thread to connect with the given device
-        mConnectThread = new ConnectThread(device, secure);
+
+        mAutothread = new AutoThread(device, secure);
         setState(STATE_CONNECTING);
-        mConnectThread.start();
-        while(!mConnectThread.done){
+        mAutothread.start();
+        while(!mAutothread.done){
         }
-        return mConnectThread.result;
+        return mAutothread.result;
     }
     public void failed(){
         connectionFailed();
+    }
+
+    private class AutoThread extends Thread {
+        private final BluetoothSocket mmSocket;
+        private final BluetoothDevice mmDevice;
+        private String mSocketType;
+
+        //auto-result
+        boolean done;
+        boolean result;
+
+        public AutoThread(BluetoothDevice device, boolean secure) {
+
+            //set
+            done = false;
+            result = false;
+
+            mmDevice = device;
+            BluetoothSocket tmp = null;
+            mSocketType = secure ? "Secure" : "Insecure";
+
+            // Get a BluetoothSocket for a connection with the
+            // given BluetoothDevice
+            try {
+
+                    tmp = device.createInsecureRfcommSocketToServiceRecord(
+                            MY_UUID_INSECURE);
+
+            } catch (IOException e) {
+                Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
+            }
+            mmSocket = tmp;
+        }
+
+        public void run() {
+            Log.i(TAG, "BEGIN mConnectThread SocketType:" + mSocketType);
+            setName("ConnectThread" + mSocketType);
+
+            // Always cancel discovery because it will slow down a connection
+            mAdapter.cancelDiscovery();
+
+            // Make a connection to the BluetoothSocket
+            try {
+                // This is a blocking call and will only return on a
+                // successful connection or an exception
+                mmSocket.connect();
+            } catch (IOException e) {
+                // Close the socket
+                try {
+                    mmSocket.close();
+                } catch (IOException e2) {
+                    Log.e(TAG, "unable to close() " + mSocketType +
+                            " socket during connection failure", e2);
+                }
+
+                //result auto false
+                result = false;
+                done = true;
+
+                return;
+            }
+            //result auto true
+            result = true;
+            done = true;
+
+            // Reset the ConnectThread because we're done
+            synchronized (BluetoothChatService.this) {
+                mAutothread = null;
+            }
+
+            // Start the connected thread
+            connected(mmSocket, mmDevice, mSocketType);
+        }
+
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) {
+                Log.e(TAG, "close() of connect " + mSocketType + " socket failed", e);
+            }
+        }
     }
 
 }

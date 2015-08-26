@@ -2,13 +2,6 @@
 <items version="2" >
 
     <item
-        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/gridlayout-v7/21.0.2/jars/classes.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="9742ced04aafd9ac97dd2c66c1aa0e32d2ae7e54">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f10f955d57929183ec09956f690dba700276925f.jar" />
-    </item>
-    <item
         jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.2/jars/libs/internal_impl-21.0.2.jar"
         jumboMode="false"
         revision="22.0.1"
@@ -21,6 +14,13 @@
         revision="22.0.1"
         sha1="99373741f99a0556ee293c41e8faa1ca3ae8a4e6">
         <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/support-annotations-21.0.2-6dc3faa798a5f82f91231e44ddbf17750c8f03b4.jar" />
+    </item>
+    <item
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/gridlayout-v7/21.0.2/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="9742ced04aafd9ac97dd2c66c1aa0e32d2ae7e54">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f10f955d57929183ec09956f690dba700276925f.jar" />
     </item>
     <item
         jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/cardview-v7/21.0.2/jars/classes.jar"
