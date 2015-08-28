@@ -113,6 +113,10 @@ public class BluetoothChatService {
             mConnectThread.cancel();
             mConnectThread = null;
         }
+        if (mAutothread != null) {
+            mAutothread.cancel();
+            mAutothread = null;
+        }
 
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {
@@ -181,6 +185,10 @@ public class BluetoothChatService {
             mConnectThread.cancel();
             mConnectThread = null;
         }
+        if (mAutothread != null) {
+            mAutothread.cancel();
+            mAutothread = null;
+        }
 
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {
@@ -221,6 +229,10 @@ public class BluetoothChatService {
         if (mConnectThread != null) {
             mConnectThread.cancel();
             mConnectThread = null;
+        }
+        if (mAutothread != null) {
+            mAutothread.cancel();
+            mAutothread = null;
         }
 
         if (mConnectedThread != null) {

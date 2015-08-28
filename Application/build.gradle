@@ -16,9 +16,9 @@ repositories {
 }
 
 dependencies {
-    compile "com.android.support:support-v4:21.0.2"
-    compile "com.android.support:gridlayout-v7:21.0.2"
-    compile "com.android.support:cardview-v7:21.0.2"
+    compile 'com.android.support:support-v4:21.0.2'
+    compile 'com.android.support:gridlayout-v7:21.0.2'
+    compile 'com.android.support:cardview-v7:21.0.2'
 }
 
 // The sample build uses multiple directories to
@@ -56,7 +56,23 @@ android {
     }
 
 }
+repositories {
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
+    mavenCentral()
+}
+dependencies {
 
+    // Optional for XMPPTCPConnection
+    compile "org.igniterealtime.smack:smack-android:4.1.3"
+    compile "org.igniterealtime.smack:smack-tcp:4.1.3"
+    // Optional for XMPP-IM (RFC 6121) support (Roster, Threaded Chats, …)
+    compile "org.igniterealtime.smack:smack-im:4.1.3"
+    // Optional for XMPP extensions support
+    compile "org.igniterealtime.smack:smack-extensions:4.1.3"
+
+}
 
 
 

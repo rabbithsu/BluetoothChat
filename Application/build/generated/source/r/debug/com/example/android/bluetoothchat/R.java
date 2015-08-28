@@ -328,6 +328,7 @@ containing a value of this type.
         public static final int fragment_rssi=0x7f030004;
         public static final int message=0x7f030005;
         public static final int message_out=0x7f030006;
+        public static final int xmpp_list=0x7f030007;
     }
     public static final class menu {
         public static final int bluetooth_chat=0x7f080000;
