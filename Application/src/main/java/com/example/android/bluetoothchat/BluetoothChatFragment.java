@@ -92,6 +92,8 @@ public class BluetoothChatFragment extends Fragment {
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
+    //XMPP codes
+    private static final int REQUEST_XMPP_CONNECT = 4;
 
     // Layout Views
     ListView mConversationView;
@@ -126,16 +128,9 @@ public class BluetoothChatFragment extends Fragment {
 
     //auto
     ArrayList<BluetoothDevice> device = new ArrayList<BluetoothDevice>();
-
     //XMPP
-    //private XMPPConnection connection;
+    public static XMPPService mXMPPService = null;
 
-    public static final String HOST = "45.55.60.199";
-    public static final int PORT = 5222;
-    public static final String SERVICE = "45.55.60.199";
-    public static final String USERNAME = "rabbithsu";
-    public static final String PASSWORD = "123456";
-    private ArrayList<String> messages = new ArrayList<String>();
 
 
     @Override
@@ -462,6 +457,13 @@ public class BluetoothChatFragment extends Fragment {
                             Toast.LENGTH_SHORT).show();
                     getActivity().finish();
                 }
+                break;
+            case REQUEST_XMPP_CONNECT:
+                // When the request to enable Bluetooth returns
+                if (resultCode == Activity.RESULT_OK) {
+
+                }
+                break;
         }
     }
 
@@ -504,6 +506,11 @@ public class BluetoothChatFragment extends Fragment {
             case R.id.discoverable: {
                 // Ensure this device is discoverable by others
                 ensureDiscoverable();
+                return true;
+            }
+            case R.id.xmpp_connect: {
+                Intent serverIntent = new Intent(getActivity(), XMPPListActivity.class);
+                startActivityForResult(serverIntent, REQUEST_XMPP_CONNECT);
                 return true;
             }
         }
@@ -594,78 +601,7 @@ public class BluetoothChatFragment extends Fragment {
 
     //XMPP
     public void XMPPconnect(){
-        Thread t = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                // Create a connection
-                XMPPTCPConnectionConfiguration.Builder config = XMPPTCPConnectionConfiguration.builder();
-                config.setServiceName("45.55.60.199");
-                config.setHost("45.55.60.199");
-                config.setPort(5222);
-                config.setUsernameAndPassword("rabbithsu", "123456");
-                //config.setDebuggerEnabled(true);
-                config.setCompressionEnabled(false);
-                config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
-
-
-
-                //config.setSASLAuthenticationEnabled(false);
-                AbstractXMPPConnection connection = new XMPPTCPConnection(config.build());
-
-                try {
-                    connection.connect();
-                    Log.d("XMPPChatDemoActivity",
-                            "Connected to " + connection.getHost());
-                } catch (Exception ex) {
-                    Log.d("XMPPChatDemoActivity", "Failed to connect to "
-                            + connection.getHost());
-                    Log.d("XMPPChatDemoActivity", ex.toString());
-                    //connection = null;
-                }
-                try {
-                    // SASLAuthentication.supportSASLMechanism("PLAIN", 0);
-                    connection.login(USERNAME, PASSWORD);
-                    Log.d("XMPPChatDemoActivity",
-                            "Logged in as " + connection.getUser());
-                    //chat test
-                    Chat chat = ChatManager.getInstanceFor(connection) .createChat("rabbithsu@45.55.60.199", new ChatMessageListener() {
-                        @Override
-                        public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
-                            Log.d("XMPPChatDemoActivity", "Receive: "+ message.getBody());
-                        }
-
-
-                    });
-                    chat.sendMessage("Howdy!");
-                    // Set the status to available
-                    Presence presence = new Presence(Presence.Type.available);
-                    connection.sendStanza(presence);
-                    //setReceive(connection);
-
-                    Roster roster = Roster.getInstanceFor(connection);
-                    if (!roster.isLoaded())
-                        roster.reloadAndWait();
-                    Collection<RosterEntry> entries = roster.getEntries();
-
-                    for (RosterEntry entry : entries) {
-                        //System.out.println(entry);
-                        Log.d("XMPPChatDemoActivity", "USER:  "
-                                + entry.getUser());
-                        //Toast.makeText(getActivity(), entry.getName(), Toast.LENGTH_SHORT).show();
-
-                    }
-                } catch (Exception ex) {
-                    Log.d("XMPPChatDemoActivity", "Failed to log in as "
-                            + USERNAME);
-                    Log.d("XMPPChatDemoActivity", ex.toString());
-                    connection = null;
-                }
-
-                //dialog.dismiss();
-            }
-        });
-        t.start();
+        mXMPPService = new XMPPService(getActivity(), mHandler);
     }
 
 /*

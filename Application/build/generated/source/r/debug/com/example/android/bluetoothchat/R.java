@@ -278,7 +278,7 @@ containing a value of this type.
         public static final int tile=0x7f020004;
     }
     public static final class id {
-        public static final int RSSI=0x7f090028;
+        public static final int RSSI=0x7f090029;
         public static final int alignBounds=0x7f090002;
         public static final int alignMargins=0x7f090003;
         public static final int bottom=0x7f090004;
@@ -303,7 +303,7 @@ containing a value of this type.
         public static final int insecure_connect_scan=0x7f090025;
         public static final int left=0x7f09000e;
         public static final int log_fragment=0x7f090019;
-        public static final int menu_toggle_log=0x7f090027;
+        public static final int menu_toggle_log=0x7f090028;
         public static final int new_devices=0x7f090015;
         public static final int out=0x7f090023;
         public static final int paired_devices=0x7f090013;
@@ -319,6 +319,7 @@ containing a value of this type.
         public static final int title_paired_devices=0x7f090012;
         public static final int top=0x7f090011;
         public static final int vertical=0x7f090001;
+        public static final int xmpp_connect=0x7f090027;
     }
     public static final class layout {
         public static final int activity_device_list=0x7f030000;
@@ -360,6 +361,7 @@ containing a value of this type.
         public static final int title_not_connected=0x7f070015;
         public static final int title_other_devices=0x7f070016;
         public static final int title_paired_devices=0x7f070017;
+        public static final int xmpp_connect=0x7f070018;
     }
     public static final class style {
         public static final int AppTheme=0x7f050002;
