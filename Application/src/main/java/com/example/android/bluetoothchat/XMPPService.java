@@ -26,9 +26,10 @@ import java.util.UUID;
  * Created by nccu_dct on 15/8/29.
  */
 public class XMPPService {
-
+    private static final String TAG = "BluetoothChatService";
     private AbstractXMPPConnection connection;
     private final Handler mHandler;
+    private Chat XMPPchat;
 
 
 
@@ -44,7 +45,7 @@ public class XMPPService {
 
     public XMPPService(Context context, Handler handler) {
         mHandler = handler;
-
+        XMPPchat = null;
         Thread t = new Thread(new Runnable() {
 
             @Override
@@ -78,16 +79,7 @@ public class XMPPService {
                     connection.login(USERNAME, PASSWORD);
                     Log.d("XMPPChatDemoActivity",
                             "Logged in as " + connection.getUser());
-                    //chat test
-                    Chat chat = ChatManager.getInstanceFor(connection).createChat("rabbithsu@45.55.60.199", new ChatMessageListener() {
-                        @Override
-                        public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
-                            Log.d("XMPPChatDemoActivity", "Receive: " + message.getBody());
-                        }
 
-
-                    });
-                    chat.sendMessage("Howdy!");
                     // Set the status to available
                     Presence presence = new Presence(Presence.Type.available);
                     connection.sendStanza(presence);
@@ -120,5 +112,54 @@ public class XMPPService {
 
     public AbstractXMPPConnection getConnection(){
         return this.connection;
+    }
+
+    public void write(String out) {
+        // Create temporary object
+
+        // Perform the write unsynchronized
+        try {
+            XMPPchat.sendMessage(out);
+            mHandler.obtainMessage(Constants.MESSAGE_XMPP_WRITE, -1, -1, out)
+                    .sendToTarget();
+        }
+        catch (Exception ex){
+            Log.d(TAG, "Send message failed.");
+        }
+    }
+
+    public void startchat(String account){
+        Log.d(TAG, account);
+        new XMPPThread(account);
+    }
+
+
+    private class XMPPThread{
+        private final String USRID;
+
+
+        public XMPPThread(String account) {
+            USRID = account;
+            Thread m = new Thread(new Runnable() {
+                @Override
+                public void run(){
+                //chat test
+                    Chat chat = ChatManager.getInstanceFor(connection).createChat("rabbithsu@45.55.60.199", new ChatMessageListener() {
+                        @Override
+                        public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
+                            Log.d("XMPPChatDemoActivity", "Receive: " + message.getBody());
+                            mHandler.obtainMessage(Constants.MESSAGE_XMPP_READ, message.getBody().length(), -1, message.getBody())
+                                .sendToTarget();
+                            }
+
+                });
+                XMPPchat = chat;
+
+                }
+            });
+            m.start();
+
+        }
+
     }
 }

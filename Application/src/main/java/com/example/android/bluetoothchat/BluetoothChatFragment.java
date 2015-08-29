@@ -46,36 +46,8 @@ import android.widget.Toast;
 
 import com.example.android.common.logger.Log;
 
-import org.jivesoftware.smack.Manager;
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.AbstractXMPPConnection;
-import org.jivesoftware.smack.filter.MessageTypeFilter;
-import org.jivesoftware.smack.filter.PacketFilter;
-import org.jivesoftware.smack.filter.StanzaFilter;
-import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.chat.ChatManager;
-import org.jivesoftware.smack.chat.ChatManagerListener;
-import org.jivesoftware.smack.chat.*;
-import org.jivesoftware.smack.packet.Stanza;
-import org.jivesoftware.smack.tcp.XMPPTCPConnection;
-import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.jivesoftware.smack.tcp.*;
-import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.roster.*;
-import org.jivesoftware.smack.roster.Roster;
-import org.jivesoftware.smack.roster.RosterEntry;
-import org.jivesoftware.smack.roster.RosterEntries;
-import org.jivesoftware.smack.*;
-import org.jivesoftware.smack.SASLAuthentication;
-import org.jivesoftware.smack.util.StringUtils;
 
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
-
-
-
+import org.apache.http.entity.StringEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -130,6 +102,8 @@ public class BluetoothChatFragment extends Fragment {
     ArrayList<BluetoothDevice> device = new ArrayList<BluetoothDevice>();
     //XMPP
     public static XMPPService mXMPPService = null;
+    private  boolean XMPPing = false;
+    private  String mXMPPname = null;
 
 
 
@@ -309,8 +283,19 @@ public class BluetoothChatFragment extends Fragment {
     private void sendMessage(String message) {
         // Check that we're actually connected before trying anything
         if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
-            Toast.makeText(getActivity(), R.string.not_connected, Toast.LENGTH_SHORT).show();
-            return;
+            if(XMPPing){
+                // Get the message bytes and tell the BluetoothChatService to write
+                //byte[] send = message.getBytes();
+                mXMPPService.write(message);
+
+                // Reset out string buffer to zero and clear the edit text field
+                mOutStringBuffer.setLength(0);
+                mOutEditText.setText(mOutStringBuffer);
+            }
+            else{
+                Toast.makeText(getActivity(), R.string.not_connected, Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         // Check that there's actually something to send
@@ -427,6 +412,16 @@ public class BluetoothChatFragment extends Fragment {
                                 Toast.LENGTH_SHORT).show();
                     }
                     break;
+                case Constants.MESSAGE_XMPP_READ:
+                    String read = (String) msg.obj;
+                    mdata.add(new CheckMessage(CheckMessage.MessageType_To, mXMPPname + ":  " + read));
+                    mConversationArrayAdapter.Refresh();
+                    break;
+                case Constants.MESSAGE_XMPP_WRITE:
+                    String write = (String) msg.obj;
+                    mdata.add(new CheckMessage(CheckMessage.MessageType_From, "Me:  " + write));
+                    mConversationArrayAdapter.Refresh();
+                    break;
             }
         }
     };
@@ -436,12 +431,14 @@ public class BluetoothChatFragment extends Fragment {
             case REQUEST_CONNECT_DEVICE_SECURE:
                 // When DeviceListActivity returns with a device to connect
                 if (resultCode == Activity.RESULT_OK) {
+                    XMPPing = false;
                     connectDevice(data, true);
                 }
                 break;
             case REQUEST_CONNECT_DEVICE_INSECURE:
                 // When DeviceListActivity returns with a device to connect
                 if (resultCode == Activity.RESULT_OK) {
+                    XMPPing = false;
                     connectDevice(data, false);
                 }
                 break;
@@ -461,6 +458,10 @@ public class BluetoothChatFragment extends Fragment {
             case REQUEST_XMPP_CONNECT:
                 // When the request to enable Bluetooth returns
                 if (resultCode == Activity.RESULT_OK) {
+                    if(mChatService != null) {
+                        mChatService.stop();
+                    }
+                    connectXMPPUser(data);
 
                 }
                 break;
@@ -601,7 +602,17 @@ public class BluetoothChatFragment extends Fragment {
 
     //XMPP
     public void XMPPconnect(){
+
         mXMPPService = new XMPPService(getActivity(), mHandler);
+    }
+
+    private void connectXMPPUser(Intent data){
+        // Get user account
+        XMPPing = true;
+        String account = data.getExtras()
+                .getString(XMPPListActivity.EXTRA_ACCOUNT);
+        mXMPPname = account.split("@")[0];
+        mXMPPService.startchat(account);
     }
 
 /*

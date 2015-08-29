@@ -82,8 +82,8 @@ public class XMPPListActivity extends Activity {
             //mBtAdapter.cancelDiscovery();
 
             // Get the device MAC address, which is the last 17 chars in the View
-            String account = ((TextView) v).getText().toString();
-            //String address = info.substring(info.length() - 17);
+            String info = ((TextView) v).getText().toString();
+            String account = info.split("\n")[1];
 
             // Create the result Intent and include the MAC address
             Intent intent = new Intent();
