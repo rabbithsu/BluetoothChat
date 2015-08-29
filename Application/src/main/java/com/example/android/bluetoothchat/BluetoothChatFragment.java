@@ -52,10 +52,12 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.chat.ChatManagerListener;
 import org.jivesoftware.smack.chat.*;
+import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.tcp.*;
@@ -133,6 +135,7 @@ public class BluetoothChatFragment extends Fragment {
     public static final String SERVICE = "45.55.60.199";
     public static final String USERNAME = "rabbithsu";
     public static final String PASSWORD = "123456";
+    private ArrayList<String> messages = new ArrayList<String>();
 
 
     @Override
@@ -601,7 +604,8 @@ public class BluetoothChatFragment extends Fragment {
                 config.setHost("45.55.60.199");
                 config.setPort(5222);
                 config.setUsernameAndPassword("rabbithsu", "123456");
-                config.setDebuggerEnabled(true);
+                //config.setDebuggerEnabled(true);
+                config.setCompressionEnabled(false);
                 config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
 
@@ -624,40 +628,31 @@ public class BluetoothChatFragment extends Fragment {
                     connection.login(USERNAME, PASSWORD);
                     Log.d("XMPPChatDemoActivity",
                             "Logged in as " + connection.getUser());
+                    //chat test
+                    Chat chat = ChatManager.getInstanceFor(connection) .createChat("rabbithsu@45.55.60.199", new ChatMessageListener() {
+                        @Override
+                        public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
+                            Log.d("XMPPChatDemoActivity", "Receive: "+ message.getBody());
+                        }
 
+
+                    });
+                    chat.sendMessage("Howdy!");
                     // Set the status to available
                     Presence presence = new Presence(Presence.Type.available);
                     connection.sendStanza(presence);
                     //setReceive(connection);
 
                     Roster roster = Roster.getInstanceFor(connection);
-                    Collection<RosterEntry> entries = roster.getEntries();
                     if (!roster.isLoaded())
                         roster.reloadAndWait();
-                    for (RosterEntry entry : entries) {
-                        Log.d("XMPPChatDemoActivity",
-                                "--------------------------------------");
-                        Log.d("XMPPChatDemoActivity", "RosterEntry " + entry);
-                        Log.d("XMPPChatDemoActivity",
-                                "User: " + entry.getUser());
-                        Log.d("XMPPChatDemoActivity",
-                                "Name: " + entry.getName());
-                        Log.d("XMPPChatDemoActivity",
-                                "Status: " + entry.getStatus());
-                        Log.d("XMPPChatDemoActivity",
-                                "Type: " + entry.getType());
-                        Presence entryPresence = roster.getPresence(entry
-                                .getUser());
+                    Collection<RosterEntry> entries = roster.getEntries();
 
-                        Log.d("XMPPChatDemoActivity", "Presence Status: "
-                                + entryPresence.getStatus());
-                        Log.d("XMPPChatDemoActivity", "Presence Type: "
-                                + entryPresence.getType());
-                        Presence.Type type = entryPresence.getType();
-                        if (type == Presence.Type.available)
-                            android.util.Log.d("XMPPChatDemoActivity", "Presence AVIALABLE");
-                        Log.d("XMPPChatDemoActivity", "Presence : "
-                                + entryPresence);
+                    for (RosterEntry entry : entries) {
+                        //System.out.println(entry);
+                        Log.d("XMPPChatDemoActivity", "USER:  "
+                                + entry.getUser());
+                        //Toast.makeText(getActivity(), entry.getName(), Toast.LENGTH_SHORT).show();
 
                     }
                 } catch (Exception ex) {
@@ -673,6 +668,14 @@ public class BluetoothChatFragment extends Fragment {
         t.start();
     }
 
-
-
+/*
+    public void setReceive(AbstractXMPPConnection connect) {
+        //connection = connection;
+        Chat chat = ChatManager.getInstanceFor(connect).createChat("jsmith@jivesoftware.com", new MessageListener() {
+            @Override
+            public void processMessage(Message message) {
+                System.out.println("Received message: " + message);
+            }
+        });
+    }*/
 }
