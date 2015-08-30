@@ -611,8 +611,13 @@ public class BluetoothChatFragment extends Fragment {
         XMPPing = true;
         String account = data.getExtras()
                 .getString(XMPPListActivity.EXTRA_ACCOUNT);
-        mXMPPname = account.split("@")[0];
-        mXMPPService.startchat(account);
+
+        mdata.clear();
+        mConversationArrayAdapter.Refresh();
+        if(mXMPPname == null) {
+            mXMPPService.startchat(account);
+            mXMPPname = account.split("@")[0];
+        }
     }
 
 /*

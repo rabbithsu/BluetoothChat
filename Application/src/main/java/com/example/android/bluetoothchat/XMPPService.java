@@ -26,7 +26,7 @@ import java.util.UUID;
  * Created by nccu_dct on 15/8/29.
  */
 public class XMPPService {
-    private static final String TAG = "BluetoothChatService";
+    private static final String TAG = "XMPPService";
     private AbstractXMPPConnection connection;
     private final Handler mHandler;
     private Chat XMPPchat;
@@ -140,11 +140,12 @@ public class XMPPService {
 
         public XMPPThread(String account) {
             USRID = account;
+            Log.d(TAG, "Chat to user: "+USRID);
             Thread m = new Thread(new Runnable() {
                 @Override
                 public void run(){
                 //chat test
-                    Chat chat = ChatManager.getInstanceFor(connection).createChat("rabbithsu@45.55.60.199", new ChatMessageListener() {
+                    Chat chat = ChatManager.getInstanceFor(connection).createChat(USRID, new ChatMessageListener() {
                         @Override
                         public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
                             Log.d("XMPPChatDemoActivity", "Receive: " + message.getBody());

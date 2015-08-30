@@ -11,7 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 
@@ -25,7 +24,7 @@ public class XMPPListActivity extends Activity {
 
     private static final String TAG = "XMPPListActivity";
     public static String EXTRA_ACCOUNT = "remote_account";
-    private BluetoothAdapter mBtAdapter;
+
 
 
     @Override
