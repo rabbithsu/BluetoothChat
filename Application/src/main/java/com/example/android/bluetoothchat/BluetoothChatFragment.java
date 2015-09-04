@@ -113,7 +113,7 @@ public class BluetoothChatFragment extends Fragment {
         setHasOptionsMenu(true);
         // Get local Bluetooth adapter
 
-
+        Toast.makeText(getActivity(), "onCreat.", Toast.LENGTH_LONG).show();
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // If the adapter is null, then Bluetooth is not supported
@@ -129,6 +129,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        Toast.makeText(getActivity(), "onStart.", Toast.LENGTH_LONG).show();
         // If BT is not on, request that it be enabled.
         // setupChat() will then be called during onActivityResult
         if (!mBluetoothAdapter.isEnabled()) {
@@ -147,6 +148,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Toast.makeText(getActivity(), "onDestroy.", Toast.LENGTH_LONG).show();
         if (mChatService != null) {
             mChatService.stop();
             mChatService = null;
@@ -157,6 +159,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Toast.makeText(getActivity(), "onResume.", Toast.LENGTH_LONG).show();
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
@@ -166,14 +169,14 @@ public class BluetoothChatFragment extends Fragment {
 
             // Only if the state is STATE_NONE, do we know that we haven't started already
             //Toast.makeText(getActivity(), mChatService.getState()+"", Toast.LENGTH_LONG).show();
-            /*if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
                 // Start the Bluetooth chat services
-                //mChatService.start();
-                mChatService = null;
-                setupChat();
-            }*/
-            mChatService = null;
-            setupChat();
+                mChatService.start();
+                //mChatService = null;
+                //setupChat();
+            }
+            //mChatService.start();// = null;
+            //setupChat();
 
         }
         else {
@@ -185,25 +188,23 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        Toast.makeText(getActivity(), "onStop.", Toast.LENGTH_LONG).show();
         device.clear();
-        if(mChatService != null) {
+        /*if(mChatService != null) {
             mChatService.stop();
-            mChatService=null;
-        }
+        }*/
     }
     @Override
     public void onPause() {
         super.onPause();
+        Toast.makeText(getActivity(), "onPause.", Toast.LENGTH_LONG).show();
         try {
             getActivity().unregisterReceiver(receiver);
         }
         catch (IllegalArgumentException e){
 
         }
-        if(mChatService != null) {
-            mChatService.stop();
-            mChatService=null;
-        }
+
     }
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,

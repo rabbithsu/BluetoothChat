@@ -9,6 +9,7 @@ import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
+import org.jivesoftware.smack.chat.ChatManagerListener;
 import org.jivesoftware.smack.chat.ChatMessageListener;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.roster.Roster;
@@ -52,10 +53,10 @@ public class XMPPService {
             public void run() {
                 // Create a connection
                 XMPPTCPConnectionConfiguration.Builder config = XMPPTCPConnectionConfiguration.builder();
-                config.setServiceName("45.55.60.199");
-                config.setHost("45.55.60.199");
+                config.setServiceName(SERVICE);
+                config.setHost(HOST);
                 config.setPort(5222);
-                config.setUsernameAndPassword("rabbithsu", "123456");
+                config.setUsernameAndPassword(USERNAME, PASSWORD);
                 //config.setDebuggerEnabled(true);
                 config.setCompressionEnabled(false);
                 config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
@@ -97,6 +98,25 @@ public class XMPPService {
                         //Toast.makeText(getActivity(), entry.getName(), Toast.LENGTH_SHORT).show();
 
                     }
+                    //chat receiver
+                    ChatManager chatManager = ChatManager.getInstanceFor(connection);
+                    chatManager.addChatListener(
+                            new ChatManagerListener() {
+                                @Override
+                                public void chatCreated(Chat chat, boolean createdLocally)
+                                {
+                                    if (!createdLocally)
+                                        chat.addMessageListener(new ChatMessageListener(){
+                                            @Override
+                                            public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
+                                                Log.d("XMPPChatDemoActivity", "Receive: " + message.getBody());
+                                                mHandler.obtainMessage(Constants.MESSAGE_XMPP_READ, message.getBody().length(), -1, message.getBody())
+                                                        .sendToTarget();
+                                            }
+
+                                        });;
+                                }
+                            });
                 } catch (Exception ex) {
                     Log.d("XMPPChatDemoActivity", "Failed to log in as "
                             + USERNAME);
