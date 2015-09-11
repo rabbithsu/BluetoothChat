@@ -62,6 +62,7 @@ repositories {
     }
     mavenCentral()
 }
+
 dependencies {
 
     // Optional for XMPPTCPConnection

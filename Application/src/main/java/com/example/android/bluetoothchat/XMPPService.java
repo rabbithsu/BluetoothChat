@@ -38,7 +38,7 @@ public class XMPPService {
     public static final String HOST = "45.55.60.199";
     public static final int PORT = 5222;
     public static final String SERVICE = "45.55.60.199";
-    public static final String USERNAME = "rabbithsu";
+    public static final String USERNAME = "rabbithsuqqq";
     public static final String PASSWORD = "123456";
     private ArrayList<String> messages = new ArrayList<String>();
 

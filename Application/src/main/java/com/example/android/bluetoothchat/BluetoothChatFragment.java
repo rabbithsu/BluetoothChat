@@ -105,7 +105,8 @@ public class BluetoothChatFragment extends Fragment {
     private  boolean XMPPing = false;
     private  String mXMPPname = null;
 
-
+    //three
+    private String MyName = "C";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,7 +114,7 @@ public class BluetoothChatFragment extends Fragment {
         setHasOptionsMenu(true);
         // Get local Bluetooth adapter
 
-        Toast.makeText(getActivity(), "onCreat.", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getActivity(), "onCreat.", Toast.LENGTH_LONG).show();
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // If the adapter is null, then Bluetooth is not supported
@@ -129,7 +130,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Toast.makeText(getActivity(), "onStart.", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getActivity(), "onStart.", Toast.LENGTH_LONG).show();
         // If BT is not on, request that it be enabled.
         // setupChat() will then be called during onActivityResult
         if (!mBluetoothAdapter.isEnabled()) {
@@ -148,7 +149,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(getActivity(), "onDestroy.", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getActivity(), "onDestroy.", Toast.LENGTH_LONG).show();
         if (mChatService != null) {
             mChatService.stop();
             mChatService = null;
@@ -159,7 +160,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Toast.makeText(getActivity(), "onResume.", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getActivity(), "onResume.", Toast.LENGTH_LONG).show();
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
@@ -188,7 +189,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        Toast.makeText(getActivity(), "onStop.", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getActivity(), "onStop.", Toast.LENGTH_LONG).show();
         device.clear();
         /*if(mChatService != null) {
             mChatService.stop();
@@ -197,7 +198,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        Toast.makeText(getActivity(), "onPause.", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getActivity(), "onPause.", Toast.LENGTH_LONG).show();
         try {
             getActivity().unregisterReceiver(receiver);
         }
@@ -245,7 +246,7 @@ public class BluetoothChatFragment extends Fragment {
                 if (null != view) {
                     TextView textView = (TextView) view.findViewById(R.id.edit_text_out);
                     String message = textView.getText().toString();
-                    sendMessage(message);
+                    sendMessage(message, MyName);
                 }
             }
         });
@@ -281,31 +282,33 @@ public class BluetoothChatFragment extends Fragment {
      *
      * @param message A string of text to send.
      */
-    private void sendMessage(String message) {
+    private void sendMessage(String message, String name) {
         // Check that we're actually connected before trying anything
-        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
-            if(XMPPing){
-                // Get the message bytes and tell the BluetoothChatService to write
-                //byte[] send = message.getBytes();
-                mXMPPService.write(message);
+        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED&&!XMPPing) {
 
-                // Reset out string buffer to zero and clear the edit text field
-                mOutStringBuffer.setLength(0);
-                mOutEditText.setText(mOutStringBuffer);
-            }
-            else{
-                Toast.makeText(getActivity(), R.string.not_connected, Toast.LENGTH_SHORT).show();
-                return;
-            }
+
+            Toast.makeText(getActivity(), R.string.not_connected, Toast.LENGTH_SHORT).show();
+            return;
+
         }
 
         // Check that there's actually something to send
         if (message.length() > 0) {
-            // Get the message bytes and tell the BluetoothChatService to write
-            byte[] send = message.getBytes();
-            mChatService.write(send);
+            String namemessage = name+"##"+message;
+            if(XMPPing){
+                // Get the message bytes and tell the BluetoothChatService to write
+                //byte[] send = message.getBytes();
+                mXMPPService.write(namemessage);
 
-            // Reset out string buffer to zero and clear the edit text field
+            }
+            if(mChatService.getState() == BluetoothChatService.STATE_CONNECTED) {
+                // Get the message bytes and tell the BluetoothChatService to write
+                byte[] send = namemessage.getBytes();
+                mChatService.write(namemessage);
+
+                // Reset out string buffer to zero and clear the edit text field
+
+            }
             mOutStringBuffer.setLength(0);
             mOutEditText.setText(mOutStringBuffer);
         }
@@ -320,7 +323,7 @@ public class BluetoothChatFragment extends Fragment {
             // If the action is a key-up event on the return key, send the message
             if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 String message = view.getText().toString();
-                sendMessage(message);
+                sendMessage(message, MyName);
             }
             return true;
         }
@@ -373,8 +376,8 @@ public class BluetoothChatFragment extends Fragment {
                         case BluetoothChatService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
                             //mConversationArrayAdapter.clear();
-                            mdata.clear();
-                            mConversationArrayAdapter.Refresh();
+                            //mdata.clear();
+                            //mConversationArrayAdapter.Refresh();
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
@@ -389,14 +392,21 @@ public class BluetoothChatFragment extends Fragment {
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
-                    mdata.add(new CheckMessage(CheckMessage.MessageType_From, "Me:  " + writeMessage));
+                    String wMessage = writeMessage.split("##")[1];
+                    if(!writeMessage.split("##")[0].equals(MyName))
+                        break;
+                    mdata.add(new CheckMessage(CheckMessage.MessageType_From, "Me:  " + wMessage));
                     mConversationArrayAdapter.Refresh();
                     break;
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    mdata.add(new CheckMessage(CheckMessage.MessageType_To,mConnectedDeviceName + ":  " + readMessage));
+                    String rMessage = readMessage.split("##")[1];
+                    mdata.add(new CheckMessage(CheckMessage.MessageType_To, readMessage.split("##")[0]+ ":  " + rMessage));
+                    if(XMPPing){
+                        mXMPPService.write(readMessage);
+                    }
                     mConversationArrayAdapter.Refresh();
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
@@ -415,12 +425,22 @@ public class BluetoothChatFragment extends Fragment {
                     break;
                 case Constants.MESSAGE_XMPP_READ:
                     String read = (String) msg.obj;
-                    mdata.add(new CheckMessage(CheckMessage.MessageType_To, mXMPPname + ":  " + read));
+                    String rread = read.split("##")[1];
+                    mdata.add(new CheckMessage(CheckMessage.MessageType_To, read.split("##")[0] + ":  " + rread));
+                    if(mChatService.getState() == BluetoothChatService.STATE_CONNECTED) {
+                        // Get the message bytes and tell the BluetoothChatService to write
+                        //byte[] Xsend = read.getBytes();
+                        mChatService.write(read);
+                    }
                     mConversationArrayAdapter.Refresh();
                     break;
                 case Constants.MESSAGE_XMPP_WRITE:
+                    if(mChatService.getState()==BluetoothChatService.STATE_CONNECTED){
+                        break;
+                    }
                     String write = (String) msg.obj;
-                    mdata.add(new CheckMessage(CheckMessage.MessageType_From, "Me:  " + write));
+                    String wwrite = write.split("##")[1];
+                    mdata.add(new CheckMessage(CheckMessage.MessageType_From, "Me:  " + wwrite));
                     mConversationArrayAdapter.Refresh();
                     break;
             }
@@ -432,14 +452,14 @@ public class BluetoothChatFragment extends Fragment {
             case REQUEST_CONNECT_DEVICE_SECURE:
                 // When DeviceListActivity returns with a device to connect
                 if (resultCode == Activity.RESULT_OK) {
-                    XMPPing = false;
+                    //XMPPing = false;
                     connectDevice(data, true);
                 }
                 break;
             case REQUEST_CONNECT_DEVICE_INSECURE:
                 // When DeviceListActivity returns with a device to connect
                 if (resultCode == Activity.RESULT_OK) {
-                    XMPPing = false;
+                    //XMPPing = false;
                     connectDevice(data, false);
                 }
                 break;
@@ -459,9 +479,9 @@ public class BluetoothChatFragment extends Fragment {
             case REQUEST_XMPP_CONNECT:
                 // When the request to enable Bluetooth returns
                 if (resultCode == Activity.RESULT_OK) {
-                    if(mChatService != null) {
+                    /*if(mChatService != null) {
                         mChatService.stop();
-                    }
+                    }*/
                     connectXMPPUser(data);
 
                 }
@@ -613,12 +633,12 @@ public class BluetoothChatFragment extends Fragment {
         String account = data.getExtras()
                 .getString(XMPPListActivity.EXTRA_ACCOUNT);
 
-        mdata.clear();
-        mConversationArrayAdapter.Refresh();
-        if(mXMPPname == null) {
-            mXMPPService.startchat(account);
-            mXMPPname = account.split("@")[0];
-        }
+        //mdata.clear();
+        //mConversationArrayAdapter.Refresh();
+
+        mXMPPService.startchat(account);
+        //mXMPPname = account.split("@")[0];
+
     }
 
 /*

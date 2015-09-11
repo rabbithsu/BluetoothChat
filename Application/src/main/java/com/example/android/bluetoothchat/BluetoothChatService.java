@@ -30,6 +30,7 @@ import com.example.android.common.logger.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -68,7 +69,10 @@ public class BluetoothChatService {
     public static final int STATE_LISTEN = 1;     // now listening for incoming connections
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
-
+    //xmpp
+    //Multi connect
+    private ArrayList<ConnectedThread> multiBT = new ArrayList<ConnectedThread>();
+    private final String BTname;
     /**
      * Constructor. Prepares a new BluetoothChat session.
      *
@@ -79,6 +83,7 @@ public class BluetoothChatService {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
+        BTname = mAdapter.getName();
     }
 
     /**
@@ -119,12 +124,13 @@ public class BluetoothChatService {
         }
 
         // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
+        /*if (mConnectedThread != null) {
             mConnectedThread.cancel();
             mConnectedThread = null;
+        }*/
+        if(multiBT.isEmpty()) {
+            setState(STATE_LISTEN);
         }
-
-        setState(STATE_LISTEN);
 
         // Start the thread to listen on a BluetoothServerSocket
         if (mSecureAcceptThread == null) {
@@ -159,10 +165,10 @@ public class BluetoothChatService {
         }
 
         // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
+        /*if (mConnectedThread != null) {
             mConnectedThread.cancel();
             mConnectedThread = null;
-        }
+        }*/
 
         // Start the thread to connect with the given device
         mConnectThread = new ConnectThread(device, secure);
@@ -185,7 +191,7 @@ public class BluetoothChatService {
             mConnectThread.cancel();
             mConnectThread = null;
         }
-        if (mAutothread != null) {
+        /*if (mAutothread != null) {
             mAutothread.cancel();
             mAutothread = null;
         }
@@ -205,10 +211,10 @@ public class BluetoothChatService {
             mInsecureAcceptThread.cancel();
             mInsecureAcceptThread = null;
         }
-
+        */
         // Start the thread to manage the connection and perform transmissions
-        mConnectedThread = new ConnectedThread(socket, socketType);
-        mConnectedThread.start();
+        multiBT.add(new ConnectedThread(socket, socketType, multiBT.size()));
+        multiBT.get(multiBT.size()-1).start();
 
         // Send the name of the connected device back to the UI Activity
         Message msg = mHandler.obtainMessage(Constants.MESSAGE_DEVICE_NAME);
@@ -235,10 +241,10 @@ public class BluetoothChatService {
             mAutothread = null;
         }
 
-        if (mConnectedThread != null) {
+        /*if (mConnectedThread != null) {
             mConnectedThread.cancel();
             mConnectedThread = null;
-        }
+        }*/
 
         if (mSecureAcceptThread != null) {
             mSecureAcceptThread.cancel();
@@ -256,18 +262,17 @@ public class BluetoothChatService {
      * Write to the ConnectedThread in an unsynchronized manner
      *
      * @param out The bytes to write
-     * @see ConnectedThread#write(byte[])
      */
-    public void write(byte[] out) {
+    public void write(String out) {
         // Create temporary object
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {
-            if (mState != STATE_CONNECTED) return;
-            r = mConnectedThread;
+            if (multiBT.isEmpty()) return;
+            for(int co = 0; co < multiBT.size();co++){
+                multiBT.get(co).write(out);
+            }
         }
-        // Perform the write unsynchronized
-        r.write(out);
     }
 
     /**
@@ -288,13 +293,17 @@ public class BluetoothChatService {
     /**
      * Indicate that the connection was lost and notify the UI Activity.
      */
-    private void connectionLost() {
+    private void connectionLost(int num) {
         // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(Constants.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(Constants.TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
+        multiBT.remove(num);
+        for(int co = num; co < multiBT.size(); co++){
+            multiBT.get(co).setNum(co);
+        }
 
         // Start the service over to restart listening mode
         BluetoothChatService.this.start();
@@ -359,13 +368,15 @@ public class BluetoothChatService {
                                 break;
                             case STATE_NONE:
                             case STATE_CONNECTED:
+                                connected(socket, socket.getRemoteDevice(),
+                                        mSocketType);
                                 // Either not ready or already connected. Terminate new socket.
-                                try {
+                                /*try {
                                     socket.close();
                                 } catch (IOException e) {
                                     Log.e(TAG, "Could not close unwanted socket", e);
                                 }
-                                break;
+                                break;*/
                         }
                     }
                 }
@@ -472,12 +483,15 @@ public class BluetoothChatService {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private int BTnumber;
 
-        public ConnectedThread(BluetoothSocket socket, String socketType) {
+        public ConnectedThread(BluetoothSocket socket, String socketType, int num) {
             Log.d(TAG, "create ConnectedThread: " + socketType);
+            Log.d(TAG, "ConnetedThread number: " + num);
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
+            BTnumber = num;
 
             // Get the BluetoothSocket input and output streams
             try {
@@ -507,7 +521,7 @@ public class BluetoothChatService {
                             .sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
-                    connectionLost();
+                    connectionLost(BTnumber);
                     // Start the service over to restart listening mode
                     BluetoothChatService.this.start();
                     break;
@@ -518,15 +532,20 @@ public class BluetoothChatService {
         /**
          * Write to the connected OutStream.
          *
-         * @param buffer The bytes to write
+         * @param message The bytes to write
          */
-        public void write(byte[] buffer) {
+        public void write(String message) {
             try {
+                //byte[] buffer = (BTname+"##"+message).getBytes();
+                byte[] buffer = (message).getBytes();
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(Constants.MESSAGE_WRITE, -1, -1, buffer)
-                        .sendToTarget();
+                if(BTnumber ==0){
+                    mHandler.obtainMessage(Constants.MESSAGE_WRITE, -1, -1, buffer)
+                            .sendToTarget();
+                }
+
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
@@ -538,6 +557,9 @@ public class BluetoothChatService {
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
             }
+        }
+        public void setNum(int num){
+            BTnumber = num;
         }
     }
     // auto
