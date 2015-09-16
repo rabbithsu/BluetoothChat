@@ -9,16 +9,32 @@ public class CheckMessage {
     public static final int MessageType_From=1;
     public static final int MessageType_To=2;
 
-    public CheckMessage(int Type,String Content)
+    public CheckMessage(long id, long time, int Type,String Content)
     {
+        this.id = id;
+        this.time = time;
         this.mType=Type;
         this.mContent=Content;
     }
 
-
+    private long id;
+    private long time;
     private int mType;
     private String mContent;
 
+
+    public long getId(){
+        return id;
+    }
+    public void setId(long n){
+        id = n;
+    }
+    public long getTime(){
+        return time;
+    }
+    public void setTime(long t){
+        time = t;
+    }
     public int getType() {
         return mType;
     }

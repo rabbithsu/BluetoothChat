@@ -105,6 +105,10 @@ public class BluetoothChatFragment extends Fragment {
     private  boolean XMPPing = false;
     private  String mXMPPname = null;
 
+    //DB
+    private MitemDB itemDB;
+    private List<MessageItem> items= new ArrayList<>();
+
     //three
     private String MyName = "C";
 
@@ -112,6 +116,16 @@ public class BluetoothChatFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        // 建立資料庫物件
+        itemDB = new MitemDB(getActivity().getApplicationContext());
+        // 如果資料庫是空的，就建立一些範例資料
+        // 這是為了方便測試用的，完成應用程式以後可以拿掉
+        if (itemDB.getCount() == 0) {
+            itemDB.sample();
+        }
+        // 取得所有記事資料
+        items = itemDB.getAll();
         // Get local Bluetooth adapter
 
         //Toast.makeText(getActivity(), "onCreat.", Toast.LENGTH_LONG).show();
@@ -294,7 +308,9 @@ public class BluetoothChatFragment extends Fragment {
 
         // Check that there's actually something to send
         if (message.length() > 0) {
-            String namemessage = name+"##"+message;
+            Long tsLong = System.currentTimeMillis();
+            String ts = tsLong.toString();
+            String namemessage = name+"##"+message+"##"+ts;
             if(XMPPing){
                 // Get the message bytes and tell the BluetoothChatService to write
                 //byte[] send = message.getBytes();
@@ -540,6 +556,7 @@ public class BluetoothChatFragment extends Fragment {
     }
     private List<CheckMessage> LoadData(){
         List<CheckMessage> Messages=new ArrayList<CheckMessage>();
+        Messages.add(new CheckMessage(CheckMessage.MessageType_To, ""));
         return Messages;
     }
 
