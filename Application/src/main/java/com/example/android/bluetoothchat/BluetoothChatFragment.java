@@ -107,10 +107,10 @@ public class BluetoothChatFragment extends Fragment {
 
     //DB
     private MitemDB itemDB;
-    private List<MessageItem> items= new ArrayList<>();
+    private List<CheckMessage> items= new ArrayList<>();
 
     //three
-    private String MyName = "C";
+    private String MyName = "CC";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -248,6 +248,7 @@ public class BluetoothChatFragment extends Fragment {
         mConversationArrayAdapter = new MessageAdapter(getActivity(), mdata);
 
         mConversationView.setAdapter(mConversationArrayAdapter);
+        mConversationArrayAdapter.Refresh();
 
         // Initialize the compose field with a listener for the return key
         mOutEditText.setOnEditorActionListener(mWriteListener);
@@ -311,6 +312,7 @@ public class BluetoothChatFragment extends Fragment {
             Long tsLong = System.currentTimeMillis();
             String ts = tsLong.toString();
             String namemessage = name+"##"+message+"##"+ts;
+            itemDB.insert(new CheckMessage(0, tsLong, CheckMessage.MessageType_To, name, message));
             if(XMPPing){
                 // Get the message bytes and tell the BluetoothChatService to write
                 //byte[] send = message.getBytes();
@@ -555,9 +557,10 @@ public class BluetoothChatFragment extends Fragment {
         return false;
     }
     private List<CheckMessage> LoadData(){
-        List<CheckMessage> Messages=new ArrayList<CheckMessage>();
-        Messages.add(new CheckMessage(CheckMessage.MessageType_To, ""));
-        return Messages;
+        //List<CheckMessage> Messages=new ArrayList<CheckMessage>();
+        //Messages = ;
+        //Messages.add(new CheckMessage(CheckMessage.MessageType_To, ""));
+        return items;
     }
 
     //auto receiver
@@ -577,14 +580,14 @@ public class BluetoothChatFragment extends Fragment {
                 Toast.makeText(getActivity(), "Finish.", Toast.LENGTH_SHORT).show();
                 getActivity().unregisterReceiver(receiver);
                 if(!device.isEmpty()){
-                    waterchat();
+                    Autochat();
                 }
 
             }
 
         }
     };
-    private synchronized void waterchat() {
+    private synchronized void Autochat() {
         boolean cflag = false;
         Toast.makeText(getActivity(), "In auto.", Toast.LENGTH_SHORT).show();
         if (device.isEmpty()){

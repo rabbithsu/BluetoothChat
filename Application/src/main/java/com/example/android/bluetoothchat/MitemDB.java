@@ -23,6 +23,7 @@ public class MitemDB {
     public static final String DATETIME_COLUMN = "datetime";
     public static final String TYPE_COLUMN = "type";
     //public static final String TITLE_COLUMN = "title";
+    public static final String NAME_COLUMN = "name";
     public static final String CONTENT_COLUMN = "content";
     //public static final String FILENAME_COLUMN = "filename";
     //public static final String LATITUDE_COLUMN = "latitude";
@@ -33,8 +34,10 @@ public class MitemDB {
     public static final String CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    DATETIME_COLUMN + " INTEGER NOT NULL, " +
-                    CONTENT_COLUMN + " REAL NOT NULL)";
+                    DATETIME_COLUMN + " REAL NOT NULL, " +
+                    TYPE_COLUMN + " INTEGER NOT NULL, " +
+                    NAME_COLUMN + " TEXT, " +
+                    CONTENT_COLUMN + " TEXT NOT NULL)";
 
     // 資料庫物件
     private SQLiteDatabase db;
@@ -50,7 +53,7 @@ public class MitemDB {
     }
 
     // 新增參數指定的物件
-    public MessageItem insert(MessageItem item) {
+    public CheckMessage insert(CheckMessage item) {
         // 建立準備新增資料的ContentValues物件
         ContentValues cv = new ContentValues();
 
@@ -58,6 +61,7 @@ public class MitemDB {
         // 第一個參數是欄位名稱， 第二個參數是欄位的資料
         cv.put(DATETIME_COLUMN, item.getTime());
         cv.put(TYPE_COLUMN, item.getType());
+        cv.put(NAME_COLUMN, item.getName());
         cv.put(CONTENT_COLUMN, item.getContent());
 
 
@@ -74,7 +78,7 @@ public class MitemDB {
     }
 
     // 修改參數指定的物件
-    public boolean update(MessageItem item) {
+    public boolean update(CheckMessage item) {
         // 建立準備修改資料的ContentValues物件
         ContentValues cv = new ContentValues();
 
@@ -82,6 +86,7 @@ public class MitemDB {
         // 第一個參數是欄位名稱， 第二個參數是欄位的資料
         cv.put(DATETIME_COLUMN, item.getTime());
         cv.put(TYPE_COLUMN, item.getType());
+        cv.put(NAME_COLUMN, item.getName());
         cv.put(CONTENT_COLUMN, item.getContent());
 
         // 設定修改資料的條件為編號
@@ -101,8 +106,8 @@ public class MitemDB {
     }
 
     // 讀取所有記事資料
-    public List<MessageItem> getAll() {
-        List<MessageItem> result = new ArrayList<>();
+    public List<CheckMessage> getAll() {
+        List<CheckMessage> result = new ArrayList<>();
         Cursor cursor = db.query(
                 TABLE_NAME, null, null, null, null, null, null, null);
 
@@ -115,9 +120,9 @@ public class MitemDB {
     }
 
     // 取得指定編號的資料物件
-    public MessageItem get(long id) {
+    public CheckMessage get(long id) {
         // 準備回傳結果用的物件
-        MessageItem item = null;
+        CheckMessage item = null;
         // 使用編號為查詢條件
         String where = KEY_ID + "=" + id;
         // 執行查詢
@@ -140,7 +145,7 @@ public class MitemDB {
     public CheckMessage getRecord(Cursor cursor) {
         // 準備回傳結果用的物件
         //MessageItem result = new MessageItem();
-        CheckMessage result = new CheckMessage(cursor.getLong(0), cursor.getLong(1), cursor.getInt(2), cursor.getString(3));
+        CheckMessage result = new CheckMessage(cursor.getLong(0), cursor.getLong(1), cursor.getInt(2), cursor.getString(3), cursor.getString(4));
 
         /*result.setId(cursor.getLong(0));
         result.setTime(cursor.getLong(1));
@@ -166,10 +171,10 @@ public class MitemDB {
 
     // 建立範例資料
     public void sample() {
-        MessageItem item = new MessageItem(System.currentTimeMillis(), 1, "關於Android Tutorial的事情.");
-        MessageItem item2 = new MessageItem(System.currentTimeMillis(), 2, "一隻非常可愛的小狗狗!她的名字叫「大熱狗」，又叫\n作「奶嘴」，是一隻非常可愛\n的小狗。");
-        MessageItem item3 = new MessageItem(System.currentTimeMillis(), 1, "一首非常好聽的音樂！Hello content");
-        MessageItem item4 = new MessageItem(System.currentTimeMillis(), 2, "儲存在資料庫的資料Hello content");
+        CheckMessage item = new CheckMessage(0, System.currentTimeMillis(), 1, "A", "hiiiii");
+        CheckMessage item2 = new CheckMessage(0, System.currentTimeMillis(), 2, "B", "hello");
+        CheckMessage item3 = new CheckMessage(0, System.currentTimeMillis(), 1, "A", "yessssss");
+        CheckMessage item4 = new CheckMessage(0, System.currentTimeMillis(), 2, "C", "nooooooo");
 
         insert(item);
         insert(item2);
