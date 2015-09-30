@@ -66,6 +66,7 @@ public class BluetoothChatFragment extends Fragment {
     private static final int REQUEST_ENABLE_BT = 3;
     //XMPP codes
     private static final int REQUEST_XMPP_CONNECT = 4;
+    private static final int REQUEST_XMPP_LOGIN = 5;
 
     // Layout Views
     ListView mConversationView;
@@ -104,6 +105,8 @@ public class BluetoothChatFragment extends Fragment {
     public static XMPPService mXMPPService = null;
     private  boolean XMPPing = false;
     private  String mXMPPname = null;
+    private  String username = "rabbithsu";
+    private  String password = "123456";
 
     //DB
     private MitemDB itemDB;
@@ -111,6 +114,9 @@ public class BluetoothChatFragment extends Fragment {
 
     //three
     private String MyName = "CC";
+
+    //json
+    private String JSONString;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -138,6 +144,7 @@ public class BluetoothChatFragment extends Fragment {
             activity.finish();
         }
         XMPPconnect();
+
     }
 
 
@@ -272,6 +279,10 @@ public class BluetoothChatFragment extends Fragment {
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
 
+        //Intent serverIntent = new Intent(getActivity(), LoginXMPPActivity.class);
+        //startActivityForResult(serverIntent, REQUEST_XMPP_LOGIN);
+        //XMPPconnect();
+        mChatService.start();
         //try auto
         //Toast.makeText(getActivity(), "Start try.", Toast.LENGTH_SHORT).show();
         //doDiscovery();
@@ -312,7 +323,7 @@ public class BluetoothChatFragment extends Fragment {
             Long tsLong = System.currentTimeMillis();
             String ts = tsLong.toString();
             String namemessage = name+"##"+message+"##"+ts;
-            itemDB.insert(new CheckMessage(0, tsLong, CheckMessage.MessageType_To, name, message));
+            itemDB.insert(new CheckMessage(0, tsLong, CheckMessage.MessageType_From, name, message));
             if(XMPPing){
                 // Get the message bytes and tell the BluetoothChatService to write
                 //byte[] send = message.getBytes();
@@ -413,7 +424,7 @@ public class BluetoothChatFragment extends Fragment {
                     String wMessage = writeMessage.split("##")[1];
                     if(!writeMessage.split("##")[0].equals(MyName))
                         break;
-                    mdata.add(new CheckMessage(CheckMessage.MessageType_From, "Me:  " + wMessage));
+                    mdata.add(new CheckMessage(0, Long.parseLong(writeMessage.split("##")[2]), CheckMessage.MessageType_From, MyName, wMessage));
                     mConversationArrayAdapter.Refresh();
                     break;
                 case Constants.MESSAGE_READ:
@@ -421,7 +432,9 @@ public class BluetoothChatFragment extends Fragment {
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     String rMessage = readMessage.split("##")[1];
-                    mdata.add(new CheckMessage(CheckMessage.MessageType_To, readMessage.split("##")[0]+ ":  " + rMessage));
+                    CheckMessage tmp = new CheckMessage(0, Long.parseLong(readMessage.split("##")[2]), CheckMessage.MessageType_To, readMessage.split("##")[0], rMessage);
+                    itemDB.insert(tmp);
+                    mdata.add(tmp);
                     if(XMPPing){
                         mXMPPService.write(readMessage);
                     }
@@ -443,8 +456,13 @@ public class BluetoothChatFragment extends Fragment {
                     break;
                 case Constants.MESSAGE_XMPP_READ:
                     String read = (String) msg.obj;
+                    if(read.split("##").length == 1){
+                        read = "unknownXMPP##"+read+"##0";
+                    }
                     String rread = read.split("##")[1];
-                    mdata.add(new CheckMessage(CheckMessage.MessageType_To, read.split("##")[0] + ":  " + rread));
+                    CheckMessage ttmp = new CheckMessage(0, Long.parseLong(read.split("##")[2]), CheckMessage.MessageType_To, read.split("##")[0], rread);
+                    itemDB.insert(ttmp);
+                    mdata.add(ttmp);
                     if(mChatService.getState() == BluetoothChatService.STATE_CONNECTED) {
                         // Get the message bytes and tell the BluetoothChatService to write
                         //byte[] Xsend = read.getBytes();
@@ -458,13 +476,13 @@ public class BluetoothChatFragment extends Fragment {
                     }
                     String write = (String) msg.obj;
                     String wwrite = write.split("##")[1];
-                    mdata.add(new CheckMessage(CheckMessage.MessageType_From, "Me:  " + wwrite));
+                    mdata.add(new CheckMessage(0, Long.parseLong(write.split("##")[2]), CheckMessage.MessageType_From, MyName, wwrite));
                     mConversationArrayAdapter.Refresh();
                     break;
             }
         }
     };
-
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE_SECURE:
@@ -503,6 +521,17 @@ public class BluetoothChatFragment extends Fragment {
                     connectXMPPUser(data);
 
                 }
+                break;
+            case REQUEST_XMPP_LOGIN:
+                //LOGIN INFORMATION
+                if (resultCode == Activity.RESULT_OK){
+                    username = data.getExtras().getString("USER");
+                    password = data.getExtras().getString("PW");
+                    XMPPconnect();
+                }
+                break;
+            default:
+                Log.d(TAG, "onActivity fail.");
                 break;
         }
     }
@@ -643,13 +672,15 @@ public class BluetoothChatFragment extends Fragment {
 
     //XMPP
     public void XMPPconnect(){
-
-        mXMPPService = new XMPPService(getActivity(), mHandler);
+        //MainActivity.check = true;
+        mXMPPService = new XMPPService(getActivity(), mHandler, username, password);
     }
 
     private void connectXMPPUser(Intent data){
         // Get user account
         XMPPing = true;
+        Log.d(TAG, "XMPPing True.");
+        //Toast.makeText(getActivity(), "XMPPing TRUE.", Toast.LENGTH_SHORT).show();
         String account = data.getExtras()
                 .getString(XMPPListActivity.EXTRA_ACCOUNT);
 

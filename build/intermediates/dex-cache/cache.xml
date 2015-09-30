@@ -2,32 +2,32 @@
 <items version="2" >
 
     <item
-        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.jxmpp/jxmpp-core/0.4.2-beta1/14ade1a89b0f6db4fa481f9f8a721cdec69374de/jxmpp-core-0.4.2-beta1.jar"
+        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-extensions/4.1.3/5dbf13c9faca828ce1ef27b7c8efdd637113bf6e/smack-extensions-4.1.3.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="14ade1a89b0f6db4fa481f9f8a721cdec69374de">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/jxmpp-core-0.4.2-beta1-8fde2e49cd6f3abec9091e0c0b90da317c0040c0.jar" />
+        sha1="5dbf13c9faca828ce1ef27b7c8efdd637113bf6e">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-extensions-4.1.3-20875fb6075889f2714d181a949b9ed6b7eb5107.jar" />
     </item>
     <item
-        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-resolver-minidns/4.1.3/f3b9097016923a90654e5ca5063561949e79c7b8/smack-resolver-minidns-4.1.3.jar"
+        jar="/Users/nccu_dct/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/22.2.1/support-annotations-22.2.1.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="f3b9097016923a90654e5ca5063561949e79c7b8">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-resolver-minidns-4.1.3-8a923796f20ccee5f2c1a72d24ff2b7f839dd4e7.jar" />
+        sha1="61a0ff5c29295ec56d7e0bd3d25d95dbf71b4b2b">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/support-annotations-22.2.1-2200b7d99e658349fefa2604951441bcce47d1d5.jar" />
     </item>
     <item
-        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-im/4.1.3/f8ddb93de579ec1e3b1edc9a5e35b6421b2083de/smack-im-4.1.3.jar"
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.1/jars/classes.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="f8ddb93de579ec1e3b1edc9a5e35b6421b2083de">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-im-4.1.3-4554780f71dcfc396297db653f7af26c84b21021.jar" />
+        sha1="4486e953d1f35f8ccab098b1dd67146366d5f731">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-d578921f099aa9b7adbcd6ea64228432f4313069.jar" />
     </item>
     <item
-        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.jxmpp/jxmpp-util-cache/0.4.2-beta1/43e2a81f52600639daeb02ede60cc498a13614a5/jxmpp-util-cache-0.4.2-beta1.jar"
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/support-v4/22.2.1/jars/libs/internal_impl-22.2.1.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="43e2a81f52600639daeb02ede60cc498a13614a5">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/jxmpp-util-cache-0.4.2-beta1-c35a500dac7232095a147bf509f2d561cdf8d5f7.jar" />
+        sha1="c471eaaba13ff64f6e0383d1c30a9cdc9a97efeb">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/internal_impl-22.2.1-ec21b5575f8116718530d8ef6a3c1f5bd93e94fe.jar" />
     </item>
     <item
         jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-core/4.1.3/bd2c1094cc7770e456da9b49a32b5d82e7cb5ac5/smack-core-4.1.3.jar"
@@ -37,11 +37,32 @@
         <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-core-4.1.3-3c5ad34522896bcdb2ef947d0b40bb2e1bdfd94c.jar" />
     </item>
     <item
-        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/de.measite.minidns/minidns/0.1.7/993582d1455b93a5723d2af4b39d8679735b3550/minidns-0.1.7.jar"
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/gridlayout-v7/21.0.2/jars/classes.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="993582d1455b93a5723d2af4b39d8679735b3550">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/minidns-0.1.7-42169214f89efe9df7d20d14cae3a8e02736815b.jar" />
+        sha1="9742ced04aafd9ac97dd2c66c1aa0e32d2ae7e54">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f10f955d57929183ec09956f690dba700276925f.jar" />
+    </item>
+    <item
+        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-resolver-minidns/4.1.3/f3b9097016923a90654e5ca5063561949e79c7b8/smack-resolver-minidns-4.1.3.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f3b9097016923a90654e5ca5063561949e79c7b8">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-resolver-minidns-4.1.3-8a923796f20ccee5f2c1a72d24ff2b7f839dd4e7.jar" />
+    </item>
+    <item
+        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.jxmpp/jxmpp-util-cache/0.4.2-beta1/43e2a81f52600639daeb02ede60cc498a13614a5/jxmpp-util-cache-0.4.2-beta1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="43e2a81f52600639daeb02ede60cc498a13614a5">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/jxmpp-util-cache-0.4.2-beta1-c35a500dac7232095a147bf509f2d561cdf8d5f7.jar" />
+    </item>
+    <item
+        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-im/4.1.3/f8ddb93de579ec1e3b1edc9a5e35b6421b2083de/smack-im-4.1.3.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f8ddb93de579ec1e3b1edc9a5e35b6421b2083de">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-im-4.1.3-4554780f71dcfc396297db653f7af26c84b21021.jar" />
     </item>
     <item
         jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-sasl-provided/4.1.3/9a3f4111627fa29eb3ba8fe0977990fe154f9fcc/smack-sasl-provided-4.1.3.jar"
@@ -51,18 +72,32 @@
         <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-sasl-provided-4.1.3-718e344d996936c3b4c70f72cbb6ef7aef1fa0dc.jar" />
     </item>
     <item
-        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/gridlayout-v7/21.0.2/jars/classes.jar"
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/cardview-v7/21.0.2/jars/classes.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="9742ced04aafd9ac97dd2c66c1aa0e32d2ae7e54">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f10f955d57929183ec09956f690dba700276925f.jar" />
+        sha1="b017100da14f9c158c9f5f2f508333c224b24a7c">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f13417554485b4a67f04aecd4ff65247eb3c7d31.jar" />
     </item>
     <item
-        jar="/Users/nccu_dct/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/21.0.2/support-annotations-21.0.2.jar"
+        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.jxmpp/jxmpp-core/0.4.2-beta1/14ade1a89b0f6db4fa481f9f8a721cdec69374de/jxmpp-core-0.4.2-beta1.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="99373741f99a0556ee293c41e8faa1ca3ae8a4e6">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/support-annotations-21.0.2-6dc3faa798a5f82f91231e44ddbf17750c8f03b4.jar" />
+        sha1="14ade1a89b0f6db4fa481f9f8a721cdec69374de">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/jxmpp-core-0.4.2-beta1-8fde2e49cd6f3abec9091e0c0b90da317c0040c0.jar" />
+    </item>
+    <item
+        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/de.measite.minidns/minidns/0.1.7/993582d1455b93a5723d2af4b39d8679735b3550/minidns-0.1.7.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="993582d1455b93a5723d2af4b39d8679735b3550">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/minidns-0.1.7-42169214f89efe9df7d20d14cae3a8e02736815b.jar" />
+    </item>
+    <item
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/support-v4/22.2.1/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f8efd0096475e0daf054267b61544e10dc776503">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-864c831fd4c38b60ecb9984513404108d0c143a1.jar" />
     </item>
     <item
         jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-tcp/4.1.3/df70f27498a058be050bed8f1a48ab23af0896f5/smack-tcp-4.1.3.jar"
@@ -72,18 +107,11 @@
         <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-tcp-4.1.3-f480c147b33e28277b15fdb29b0576afb5f641b2.jar" />
     </item>
     <item
-        jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-extensions/4.1.3/5dbf13c9faca828ce1ef27b7c8efdd637113bf6e/smack-extensions-4.1.3.jar"
+        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.2.42/jars/classes.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="5dbf13c9faca828ce1ef27b7c8efdd637113bf6e">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-extensions-4.1.3-20875fb6075889f2714d181a949b9ed6b7eb5107.jar" />
-    </item>
-    <item
-        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/cardview-v7/21.0.2/jars/classes.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="b017100da14f9c158c9f5f2f508333c224b24a7c">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f13417554485b4a67f04aecd4ff65247eb3c7d31.jar" />
+        sha1="e5f81129dfb3d02df80126512bc98278ed2bb40a">
+        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-6d88b831759697964c2e206bc5a860511e4f4023.jar" />
     </item>
     <item
         jar="/Users/nccu_dct/.gradle/caches/modules-2/files-2.1/org.igniterealtime.smack/smack-android/4.1.3/736dcaa69d0781a36bdbdc32539a99e5fe121f02/smack-android-4.1.3.jar"
@@ -91,20 +119,6 @@
         revision="22.0.1"
         sha1="736dcaa69d0781a36bdbdc32539a99e5fe121f02">
         <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/smack-android-4.1.3-5a6a4e84e0e86c01234a4ea597e0517ddadfcab9.jar" />
-    </item>
-    <item
-        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.2/jars/classes.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="d1bf02de1c56d942e7a9d093b8610ba1ef4128e3">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-08b0bc052314cffe4e0fb5c9e614d0b8a516b9b4.jar" />
-    </item>
-    <item
-        jar="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.2/jars/libs/internal_impl-21.0.2.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="962e8b12569c56dbdcf8367eb4eac8bb129cd18f">
-        <dex dex="/Users/nccu_dct/StudioProjects/BluetoothChat/Application/build/intermediates/pre-dexed/debug/internal_impl-21.0.2-1ca0608582e3433eb73b28bfc25fe6b252e2dc7a.jar" />
     </item>
 
 </items>

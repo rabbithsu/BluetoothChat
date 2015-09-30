@@ -35,18 +35,20 @@ public class XMPPService {
 
 
     //XMPP
-    public static final String HOST = "45.55.60.199";
+    public static final String HOST = "140.119.164.5";
     public static final int PORT = 5222;
-    public static final String SERVICE = "45.55.60.199";
-    public static final String USERNAME = "rabbithsuqq";
-    public static final String PASSWORD = "123456";
+    public static final String SERVICE = "140.119.164.5";
+    public static String USERNAME;
+    public static String PASSWORD;
     private ArrayList<String> messages = new ArrayList<String>();
 
 
 
-    public XMPPService(Context context, Handler handler) {
+    public XMPPService(Context context, Handler handler, String username, String pw) {
         mHandler = handler;
         XMPPchat = null;
+        USERNAME = username;
+        PASSWORD = pw;
         Thread t = new Thread(new Runnable() {
 
             @Override
@@ -55,7 +57,7 @@ public class XMPPService {
                 XMPPTCPConnectionConfiguration.Builder config = XMPPTCPConnectionConfiguration.builder();
                 config.setServiceName(SERVICE);
                 config.setHost(HOST);
-                config.setPort(5222);
+                config.setPort(PORT);
                 config.setUsernameAndPassword(USERNAME, PASSWORD);
                 //config.setDebuggerEnabled(true);
                 config.setCompressionEnabled(false);

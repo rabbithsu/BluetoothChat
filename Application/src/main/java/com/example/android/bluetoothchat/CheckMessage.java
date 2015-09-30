@@ -9,11 +9,11 @@ public class CheckMessage {
     public static final int MessageType_From=1;
     public static final int MessageType_To=2;
 
-    public CheckMessage(int Type,String Content)
+    /*public CheckMessage(int Type,String Content)
     {
         this.mType=Type;
         this.mContent=Content;
-    }
+    }*/
 
     public CheckMessage(long id, long time, int Type,String name, String Content)
     {

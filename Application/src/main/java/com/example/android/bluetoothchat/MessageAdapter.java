@@ -57,12 +57,12 @@ public class MessageAdapter extends BaseAdapter {
             case CheckMessage.MessageType_From:
                 mView=LayoutInflater.from(mContext).inflate(R.layout.message_out, null);
                 Content=(TextView)mView.findViewById(R.id.out);
-                Content.setText(mData.get(Index).getContent());
+                Content.setText("Me: "+mData.get(Index).getContent());
                 break;
             case CheckMessage.MessageType_To:
                 mView=LayoutInflater.from(mContext).inflate(R.layout.message, null);
                 Content=(TextView)mView.findViewById(R.id.in);
-                Content.setText(mData.get(Index).getContent());
+                Content.setText(mData.get(Index).getName()+": "+mData.get(Index).getContent());
                 break;
         }
         return mView;
