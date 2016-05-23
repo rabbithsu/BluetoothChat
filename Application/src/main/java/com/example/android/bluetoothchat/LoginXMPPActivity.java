@@ -47,18 +47,21 @@ public class LoginXMPPActivity extends Activity {
                 // Send a message using content of the edit text widget
                 TextView userview = (TextView) findViewById(R.id.editText);
                 TextView pwview = (TextView) findViewById(R.id.editText2);
+                TextView nameview = (TextView) findViewById(R.id.editText3);
                 String username = userview.getText().toString();
                 String pw = pwview.getText().toString();
+                String name = nameview.getText().toString();
                 //pwview.setText("");
-                Login(username, pw);
+                Login(username, pw, name);
 
             }
         });
 
     }
-    private void Login(String u, String p){
+    private void Login(String u, String p, String n){
         final String username = u;
         final String pw = p;
+        final String name = n;
         Thread t = new Thread(new Runnable() {
 
             @Override
@@ -67,7 +70,7 @@ public class LoginXMPPActivity extends Activity {
                 XMPPTCPConnectionConfiguration.Builder config = XMPPTCPConnectionConfiguration.builder();
                 config.setServiceName("140.119.164.5");
                 config.setHost("140.119.164.5");
-                config.setPort(5222);
+                config.setPort(5225);
                 config.setUsernameAndPassword(username, pw);
                 //config.setDebuggerEnabled(true);
                 config.setCompressionEnabled(false);
@@ -86,6 +89,7 @@ public class LoginXMPPActivity extends Activity {
                     Intent intent = new Intent();
                     intent.putExtra("USER", username);
                     intent.putExtra("PW", pw);
+                    intent.putExtra("NAME", name);
 
                     // Set result and finish this Activity
                     setResult(Activity.RESULT_OK, intent);

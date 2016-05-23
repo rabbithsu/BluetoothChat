@@ -58,6 +58,8 @@ public class XMPPListActivity extends Activity {
                 String noDevices = getResources().getText(R.string.none_paired).toString();
                 XMPPDevicesArrayAdapter.add(noDevices);
             }
+            //broadcast
+            XMPPDevicesArrayAdapter.add("Broadcast"+"\n"+"All online users.");
         }
         catch (Exception ex){
             Log.d(TAG, "FAIL:" + ex.toString());
@@ -83,6 +85,10 @@ public class XMPPListActivity extends Activity {
             // Get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String account = info.split("\n")[1];
+            //if Broadcast
+            if(account.equals("All online users.")){
+                account = "all@broadcast.140.119.164.5";
+            }
 
             // Create the result Intent and include the MAC address
             Intent intent = new Intent();

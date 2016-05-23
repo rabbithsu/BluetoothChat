@@ -12,6 +12,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.android.common.logger.Log;
+
 
 public class MitemDB {
     public static final String TABLE_NAME = "item";
@@ -102,14 +104,15 @@ public class MitemDB {
         // 設定條件為編號，格式為「欄位名稱=資料」
         String where = KEY_ID + "=" + id;
         // 刪除指定編號資料並回傳刪除是否成功
-        return db.delete(TABLE_NAME, where , null) > 0;
+        return db.delete(TABLE_NAME, where, null) > 0;
     }
 
     // 讀取所有記事資料
     public List<CheckMessage> getAll() {
         List<CheckMessage> result = new ArrayList<>();
-        Cursor cursor = db.query(
-                TABLE_NAME, null, null, null, null, null, null, null);
+        //Cursor cursor = db.query(
+        //        TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME+" ORDER BY datetime ASC", null);
 
         while (cursor.moveToNext()) {
             result.add(getRecord(cursor));
@@ -169,16 +172,60 @@ public class MitemDB {
         return result;
     }
 
+    //SYNC max
+    public long getMaxTs(){
+        long result = 0;
+        Cursor cursor = db.rawQuery("SELECT MAX(datetime) FROM " + TABLE_NAME, null);
+        if (cursor == null)
+                return result;
+
+        if (cursor.moveToNext()) {
+            result = cursor.getLong(0);
+        }
+        cursor.close();
+        return result;
+    }
+
+    public List<CheckMessage> getHistory(long start, long end){
+        List<CheckMessage> result = new ArrayList<>();
+        //Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+        //        " WHERE datetime > " + String.valueOf(start) + " and datetime <=" + String.valueOf(end), null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                " WHERE datetime > " + String.valueOf(start), null);
+        while (cursor.moveToNext()) {
+            result.add(getRecord(cursor));
+        }
+
+        cursor.close();
+        return result;
+    }
+
     // 建立範例資料
     public void sample() {
-        CheckMessage item = new CheckMessage(0, System.currentTimeMillis(), 1, "A", "hiiiii");
-        CheckMessage item2 = new CheckMessage(0, System.currentTimeMillis(), 2, "B", "hello");
-        CheckMessage item3 = new CheckMessage(0, System.currentTimeMillis(), 1, "A", "yessssss");
-        CheckMessage item4 = new CheckMessage(0, System.currentTimeMillis(), 2, "C", "nooooooo");
+        //MyDBHelper.onUpgrade(MyDBHelper.getDatabase(Context context,));
+        CheckMessage item = new CheckMessage(0, System.currentTimeMillis(), 1, "USER_A", "你好");
+        CheckMessage item2 = new CheckMessage(0, System.currentTimeMillis(), 2, "USER_B", "嗨");
+        CheckMessage item3 = new CheckMessage(0, System.currentTimeMillis(), 1, "USER_A", "哈囉");
+        CheckMessage item4 = new CheckMessage(0, System.currentTimeMillis(), 2, "USER_C", "hello");
 
         insert(item);
         insert(item2);
         insert(item3);
         insert(item4);
     }
+    public Boolean Check(Long time, String name) {
+        //  long result = 0;
+        // Boolean timeRight = true;
+        // Boolean nameRight = true;
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE datetime=" + time + " AND " + "name='" + name + "'", null);
+        if(cursor.getCount()==0){
+            Log.d("DB", "Accept.");
+            return false;
+        }
+        else{
+            Log.d("DB", "Reject.");
+            return true;
+        }
+    }
+
 }

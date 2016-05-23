@@ -18,12 +18,20 @@ package com.example.android.bluetoothchat;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.app.Service;
+import android.widget.Toast;
 
 import com.example.android.common.logger.Log;
 
@@ -31,7 +39,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class does all the work for setting up and managing Bluetooth
@@ -39,7 +49,7 @@ import java.util.UUID;
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
-public class BluetoothChatService {
+public class BluetoothChatService{
     // Debugging
     private static final String TAG = "BluetoothChatService";
 
@@ -61,8 +71,6 @@ public class BluetoothChatService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
-    //
-    private AutoThread mAutothread;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -73,6 +81,16 @@ public class BluetoothChatService {
     //Multi connect
     private ArrayList<ConnectedThread> multiBT = new ArrayList<ConnectedThread>();
     private final String BTname;
+
+    //ble auto connect
+    private BluetoothLeScanner mBluetoothLeScanner;
+    private ScanCallback mScanCallback;
+    private ScanResultAdapter mScanAdapter;
+    private static final long SCAN_PERIOD = 5000;
+    private Handler mScanHandler;
+    boolean autoing = false;
+    boolean tryed = false;
+    private String scanaddress;
     /**
      * Constructor. Prepares a new BluetoothChat session.
      *
@@ -80,10 +98,15 @@ public class BluetoothChatService {
      * @param handler A Handler to send messages back to the UI Activity
      */
     public BluetoothChatService(Context context, Handler handler) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE))
+                .getAdapter();
         mState = STATE_NONE;
         mHandler = handler;
         BTname = mAdapter.getName();
+        //
+        mScanHandler = new Handler();
+        mBluetoothLeScanner = mAdapter.getBluetoothLeScanner();
+        //mScanCallback = new SampleScanCallback();
     }
 
     /**
@@ -118,10 +141,10 @@ public class BluetoothChatService {
             mConnectThread.cancel();
             mConnectThread = null;
         }
-        if (mAutothread != null) {
+        /*if (mAutothread != null) {
             mAutothread.cancel();
             mAutothread = null;
-        }
+        }*/
 
         // Cancel any thread currently running a connection
         /*if (mConnectedThread != null) {
@@ -141,6 +164,17 @@ public class BluetoothChatService {
             mInsecureAcceptThread = new AcceptThread(false);
             mInsecureAcceptThread.start();
         }
+        try{
+            //Thread.sleep(5000);
+            if(mState != STATE_CONNECTED && !tryed){
+                tryed = true;
+                scanstart();
+            }
+        }
+        catch (Exception e){
+            Log.d(TAG, "Cant sleep." + e.toString());
+        }
+
     }
 
     /**
@@ -158,10 +192,10 @@ public class BluetoothChatService {
                 mConnectThread.cancel();
                 mConnectThread = null;
             }
-            if (mAutothread != null) {
+            /*if (mAutothread != null) {
                 mAutothread.cancel();
                 mAutothread = null;
-            }
+            }*/
         }
 
         // Cancel any thread currently running a connection
@@ -187,6 +221,7 @@ public class BluetoothChatService {
         Log.d(TAG, "connected, Socket Type:" + socketType);
 
         // Cancel the thread that completed the connection
+
         if (mConnectThread != null) {
             mConnectThread.cancel();
             mConnectThread = null;
@@ -216,6 +251,7 @@ public class BluetoothChatService {
         multiBT.add(new ConnectedThread(socket, socketType, multiBT.size()));
         multiBT.get(multiBT.size()-1).start();
 
+
         // Send the name of the connected device back to the UI Activity
         Message msg = mHandler.obtainMessage(Constants.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
@@ -224,6 +260,8 @@ public class BluetoothChatService {
         mHandler.sendMessage(msg);
 
         setState(STATE_CONNECTED);
+        tryed =false;
+
     }
 
     /**
@@ -236,10 +274,10 @@ public class BluetoothChatService {
             mConnectThread.cancel();
             mConnectThread = null;
         }
-        if (mAutothread != null) {
+        /*if (mAutothread != null) {
             mAutothread.cancel();
             mAutothread = null;
-        }
+        }*/
 
         /*if (mConnectedThread != null) {
             mConnectedThread.cancel();
@@ -269,11 +307,23 @@ public class BluetoothChatService {
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {
             if (multiBT.isEmpty()) return;
-            for(int co = 0; co < multiBT.size();co++){
-                multiBT.get(co).write(out);
+            for(ConnectedThread w : multiBT){
+                w.write(out);
             }
         }
     }
+    public void relaying(String out){
+        ConnectedThread r;
+        // Synchronize a copy of the ConnectedThread
+        synchronized (this) {
+            if (multiBT.isEmpty()) return;
+            for(ConnectedThread w : multiBT){
+                w.relay(out);
+            }
+        }
+
+    }
+
 
     /**
      * Indicate that the connection attempt failed and notify the UI Activity.
@@ -286,8 +336,10 @@ public class BluetoothChatService {
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
-        // Start the service over to restart listening mode
-        BluetoothChatService.this.start();
+        //if(!autoing){
+            // Start the service over to restart listening mode
+            BluetoothChatService.this.start();
+        //}
     }
 
     /**
@@ -346,7 +398,7 @@ public class BluetoothChatService {
             BluetoothSocket socket = null;
 
             // Listen to the server socket if we're not connected
-            while (mState != STATE_CONNECTED) {
+            while (true){//mState != STATE_CONNECTED) {
                 try {
                     // This is a blocking call and will only return on a
                     // successful connection or an exception
@@ -370,6 +422,7 @@ public class BluetoothChatService {
                             case STATE_CONNECTED:
                                 connected(socket, socket.getRemoteDevice(),
                                         mSocketType);
+                                break;
                                 // Either not ready or already connected. Terminate new socket.
                                 /*try {
                                     socket.close();
@@ -506,9 +559,59 @@ public class BluetoothChatService {
         }
 
         public void run() {
+            BluetoothChatService.this.start();
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
             int bytes;
+            String message;
+
+            //get sync
+            boolean check = false;
+            long ts = BluetoothChatFragment.itemDB.getMaxTs();
+            List<CheckMessage> hdata = null;
+            this.write("TimeStampCheck##"+ts+"##"+ts+"##");
+            while(!check){
+                try {
+                    bytes = mmInStream.read(buffer);
+                    message = new String(buffer);
+                    String[] TsCheck = message.split("##");
+                    if (TsCheck.length > 1 && TsCheck[0].equals("TimeStampCheck")){
+                        check = true;
+                        if (Long.parseLong(TsCheck[1]) < ts){
+                            //List<CheckMessage> hdata = new ArrayList<>();
+
+                            hdata = BluetoothChatFragment.itemDB.getHistory(Long.parseLong(TsCheck[1]), ts);
+                            //hdata.add(new CheckMessage(0, ts, CheckMessage.MessageType_From, "Test", "TTTT"));
+                            //hdata.add(new CheckMessage(0, ts, CheckMessage.MessageType_From, "Test2", "T222"));
+                            /*for (CheckMessage m : hdata){
+                                this.sendSync(m.getName() + "##" + m.getContent() + "##" + m.getTime());
+                            }*/
+                        }
+                    }
+
+
+                } catch (IOException e){
+                    Log.e(TAG, "disconnected", e);
+                    connectionLost(BTnumber);
+                    // Start the service over to restart listening mode
+                    BluetoothChatService.this.start();
+                    break;
+                    // Start the service over to restart listening mode
+                    //BluetoothChatService.this.start();
+                }
+            }
+            if (!(hdata == null)) {
+                for (CheckMessage m : hdata) {
+                    if(this.sendSync(m.getName() + "##" + m.getContent() + "##" + m.getTime())){
+
+                    }
+                    else{
+                        Log.d(TAG, "Sync doesn't complete.");
+                    }
+                }
+            }
+
+
 
             // Keep listening to the InputStream while connected
             while (true) {
@@ -551,6 +654,44 @@ public class BluetoothChatService {
                 Log.e(TAG, "Exception during write", e);
             }
         }
+        public void relay(String message) {
+            try {
+                //byte[] buffer = (BTname+"##"+message).getBytes();
+                byte[] buffer = (message).getBytes();
+                mmOutStream.write(buffer);
+
+            } catch (IOException e) {
+                Log.e(TAG, "Exception during relay.", e);
+            }
+        }
+
+        public boolean sendSync(String message) {
+            try {
+                //byte[] buffer = (BTname+"##"+message).getBytes();
+                byte[] buffer = (message).getBytes();
+                mmOutStream.write(buffer);
+                Log.d(TAG, message);
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Log.d(TAG, "error");
+                }
+                // Share the sent message back to the UI Activity
+                /*if(BTnumber ==0){
+                    mHandler.obtainMessage(Constants.MESSAGE_WRITE, -1, -1, buffer)
+                            .sendToTarget();
+                }*/
+                return true;
+
+            } catch (IOException e) {
+                Log.e(TAG, "Exception during write", e);
+                return false;
+            }
+        }
+        public boolean sync(){
+            return true;
+        }
 
         public void cancel() {
             try {
@@ -563,120 +704,138 @@ public class BluetoothChatService {
             BTnumber = num;
         }
     }
-    // auto
-    public synchronized boolean Autoconnect(BluetoothDevice device, boolean secure) {
-        Log.d(TAG, "connect to: " + device);
 
-        // Cancel any thread attempting to make a connection
-        if (mState == STATE_CONNECTING) {
-            if (mConnectThread != null) {
-                mConnectThread.cancel();
-                mConnectThread = null;
-            }
-            if (mAutothread != null) {
-                mAutothread.cancel();
-                mAutothread = null;
-            }
 
-        }
-
-        // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
-            return false;
-        }
-
-        // Start the thread to connect with the given device
-
-        mAutothread = new AutoThread(device, secure);
-        setState(STATE_CONNECTING);
-        mAutothread.start();
-        while(!mAutothread.done){
-        }
-        return mAutothread.result;
-    }
-    public void failed(){
-        connectionFailed();
+    public void scanstart(){
+        autoing = false;
+        startScanning();
     }
 
-    private class AutoThread extends Thread {
-        private final BluetoothSocket mmSocket;
-        private final BluetoothDevice mmDevice;
-        private String mSocketType;
+    public void startScanning() {
+        if (mScanCallback == null) {
+            Log.d(TAG, "Starting Scanning");
 
-        //auto-result
-        boolean done;
-        boolean result;
-
-        public AutoThread(BluetoothDevice device, boolean secure) {
-
-            //set
-            done = false;
-            result = false;
-
-            mmDevice = device;
-            BluetoothSocket tmp = null;
-            mSocketType = secure ? "Secure" : "Insecure";
-
-            // Get a BluetoothSocket for a connection with the
-            // given BluetoothDevice
-            try {
-
-                    tmp = device.createInsecureRfcommSocketToServiceRecord(
-                            MY_UUID_INSECURE);
-
-            } catch (IOException e) {
-                Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
-            }
-            mmSocket = tmp;
-        }
-
-        public void run() {
-            Log.i(TAG, "BEGIN mConnectThread SocketType:" + mSocketType);
-            setName("ConnectThread" + mSocketType);
-
-            // Always cancel discovery because it will slow down a connection
-            mAdapter.cancelDiscovery();
-
-            // Make a connection to the BluetoothSocket
-            try {
-                // This is a blocking call and will only return on a
-                // successful connection or an exception
-                mmSocket.connect();
-            } catch (IOException e) {
-                // Close the socket
-                try {
-                    mmSocket.close();
-                } catch (IOException e2) {
-                    Log.e(TAG, "unable to close() " + mSocketType +
-                            " socket during connection failure", e2);
+            // Will stop the scanning after a set time.
+            mScanHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    stopScanning();
+                    ///autoing = false;
                 }
+            }, SCAN_PERIOD);
 
-                //result auto false
-                result = false;
-                done = true;
+            // Kick off a new scan.
+            mScanCallback = new SampleScanCallback();
+            mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
 
-                return;
-            }
-            //result auto true
-            result = true;
-            done = true;
-
-            // Reset the ConnectThread because we're done
-            synchronized (BluetoothChatService.this) {
-                mAutothread = null;
-            }
-
-            // Start the connected thread
-            connected(mmSocket, mmDevice, mSocketType);
-        }
-
-        public void cancel() {
-            try {
-                mmSocket.close();
-            } catch (IOException e) {
-                Log.e(TAG, "close() of connect " + mSocketType + " socket failed", e);
-            }
+            /*String toastText = getString(R.string.scan_start_toast) + " "
+                    + TimeUnit.SECONDS.convert(SCAN_PERIOD, TimeUnit.MILLISECONDS) + " "
+                    + getString(R.string.seconds);*/
+            //Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+        } else {
+            //Toast.makeText(getActivity(), R.string.already_scanning, Toast.LENGTH_SHORT);
+            Log.e(TAG, "Can't Starting Scanning");
         }
     }
+
+    public void stopScanning() {
+        Log.d(TAG, "Stopping Scanning");
+
+        // Stop the scan, wipe the callback.
+        mBluetoothLeScanner.stopScan(mScanCallback);
+        mScanCallback = null;
+        if(scanaddress!=null&&!autoing) {
+            Log.d(TAG, String.valueOf(autoing));
+            autoing = true;
+            //connect(mAdapter.getRemoteDevice(scanaddress), false);
+
+
+        }
+        // Even if no new results, update 'last seen' times.
+        //mScanAdapter.notifyDataSetChanged();
+    }
+
+    private class SampleScanCallback extends ScanCallback {
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            super.onBatchScanResults(results);
+            Log.d(TAG, "ScanResult s.");
+
+            for (ScanResult result : results) {
+                //mScanAdapter.add(result);
+                Log.d(TAG, result.getDevice().getName());
+                Log.d(TAG, result.getDevice().getAddress());
+                try{
+                    Log.d(TAG, new String(result.getScanRecord().getServiceData(Constants.Service_UUID)));
+                    //scanaddress = result.getDevice().getAddress();
+                    scanaddress = new String(result.getScanRecord().getServiceData(Constants.Service_UUID));
+                }catch (Exception e){
+                    Log.e(TAG, "No datas.");
+                }
+                //Log.d(TAG, new String(result.getScanRecord().getServiceData(Constants.Service_UUID)));
+                //connect(result.getDevice(), false);
+            }
+            //mScanAdapter.notifyDataSetChanged();
+        }
+
+
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+
+            /*mScanAdapter.add(result);
+            mScanAdapter.notifyDataSetChanged();*/
+            Log.d(TAG, "ScanResult:" +callbackType);
+            Log.d(TAG, result.getDevice().getName());
+            Log.d(TAG, result.getDevice().getAddress());
+            try{
+                Log.d(TAG, new String(result.getScanRecord().getServiceData(Constants.Service_UUID)));
+                scanaddress = new String(result.getScanRecord().getServiceData(Constants.Service_UUID));
+                if(!autoing) {
+                    autoing = true;
+                    connect(mAdapter.getRemoteDevice(scanaddress), false);
+                }
+                //scanaddress = result.getDevice().getAddress();
+
+            }catch (Exception e){
+                Log.e(TAG, "No data.");
+            }
+            //connect(result.getDevice(), false);
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            super.onScanFailed(errorCode);
+            Log.d(TAG, "ScanFailed.");
+            //Toast.makeText(getActivity(), "Scan failed with error: " + errorCode, Toast.LENGTH_LONG)
+            //        .show();
+        }
+    }
+
+    /**
+     * Return a List of {@link ScanFilter} objects to filter by Service UUID.
+     */
+    private List<ScanFilter> buildScanFilters() {
+        List<ScanFilter> scanFilters = new ArrayList<>();
+
+        ScanFilter.Builder builder = new ScanFilter.Builder();
+        // Comment out the below line to see all BLE devices around you
+        builder.setServiceUuid(Constants.Service_UUID);
+        scanFilters.add(builder.build());
+
+        return scanFilters;
+    }
+
+    /**
+     * Return a {@link ScanSettings} object set to use low power (to preserve battery life).
+     */
+    private ScanSettings buildScanSettings() {
+        ScanSettings.Builder builder = new ScanSettings.Builder();
+        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+        return builder.build();
+    }
+
+
 
 }

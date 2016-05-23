@@ -7,9 +7,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:text="@string/user"
+        android:hint="@string/user"
         android:ems="10"
         android:id="@+id/editText"
+        android:text="USER_E"
         android:layout_gravity="center_horizontal" />
 
     <EditText
@@ -18,6 +19,16 @@
         android:inputType="textPassword"
         android:ems="10"
         android:id="@+id/editText2"
+        android:text="123456"
+        android:layout_gravity="center_horizontal" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:id="@+id/editText3"
+        android:text="USER_E"
         android:layout_gravity="center_horizontal" />
 
     <Button

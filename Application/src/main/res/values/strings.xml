@@ -38,6 +38,8 @@
     <string name="insecure_connect">Connect a device - Insecure</string>
     <string name="discoverable">Make discoverable</string>
     <string name="xmpp_connect">Connect XMPP User</string>
+    <string name="clear">ClearMessages</string>
+
 
    <!-- RSSI -->
     <string name="buttun">Scan</string>
@@ -45,8 +47,20 @@
     <string name="Fswitch">RSSI</string>
 
     <!-- Login -->
+    <string name="login">Log In</string>
     <string name="signin">Sign in</string>
     <string name="user">Username</string>
     <string name="Password">Password</string>
+
+    <!-- BLE SCAN -->
+    <string name="last_seen">Last Seen:</string>
+    <string name="just_now">just now</string>
+    <string name="minute_ago">minute ago</string>
+    <string name="hour_ago">hour ago</string>
+    <string name="seconds_ago">seconds ago</string>
+    <string name="minutes_ago">minutes ago</string>
+    <string name="hours_ago">hours ago</string>
+    <string name="empty_list">No devices found - refresh to try again.</string>
+    <string name="no_name">(no name)</string>
 
 </resources>

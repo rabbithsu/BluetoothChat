@@ -36,7 +36,7 @@ public class XMPPService {
 
     //XMPP
     public static final String HOST = "140.119.164.5";
-    public static final int PORT = 5222;
+    public static final int PORT = 5225;
     public static final String SERVICE = "140.119.164.5";
     public static String USERNAME;
     public static String PASSWORD;
@@ -85,6 +85,7 @@ public class XMPPService {
 
                     // Set the status to available
                     Presence presence = new Presence(Presence.Type.available);
+                    //Presence.Type.unavailable
                     connection.sendStanza(presence);
                     //setReceive(connection);
 
@@ -126,6 +127,9 @@ public class XMPPService {
                     connection = null;
                 }
 
+                //chatroomtest
+                startchat("all@broadcast.140.119.164.5");
+
                 //dialog.dismiss();
             }
         });
@@ -144,6 +148,18 @@ public class XMPPService {
             XMPPchat.sendMessage(out);
             mHandler.obtainMessage(Constants.MESSAGE_XMPP_WRITE, -1, -1, out)
                     .sendToTarget();
+        }
+        catch (Exception ex){
+            Log.d(TAG, "Send message failed.");
+        }
+    }
+
+    public void relaying(String out) {
+        // Create temporary object
+
+        // Perform the write unsynchronized
+        try {
+            XMPPchat.sendMessage(out);
         }
         catch (Exception ex){
             Log.d(TAG, "Send message failed.");

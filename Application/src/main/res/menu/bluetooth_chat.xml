@@ -35,5 +35,9 @@
         android:id="@+id/xmpp_connect"
         android:showAsAction="never"
         android:title="@string/xmpp_connect"/>
+    <item
+        android:id="@+id/DB_Clear"
+        android:showAsAction="never"
+        android:title="@string/clear"/>
 
 </menu>

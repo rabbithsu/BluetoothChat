@@ -16,6 +16,8 @@
 
 package com.example.android.bluetoothchat;
 
+import android.os.ParcelUuid;
+
 /**
  * Defines several constants used between {@link BluetoothChatService} and the UI.
  */
@@ -33,5 +35,8 @@ public interface Constants {
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
+    public static final ParcelUuid Service_UUID = ParcelUuid
+    //.fromString("");
+            .fromString("0000b81d-0000-1000-8000-00805f9b34fb");
 
 }

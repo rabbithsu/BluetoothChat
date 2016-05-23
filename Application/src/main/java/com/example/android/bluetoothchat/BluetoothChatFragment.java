@@ -20,6 +20,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -105,15 +106,15 @@ public class BluetoothChatFragment extends Fragment {
     public static XMPPService mXMPPService = null;
     private  boolean XMPPing = false;
     private  String mXMPPname = null;
-    private  String username = "rabbithsu";
+    private  String username = "rabbithsuqqq";
     private  String password = "123456";
 
     //DB
-    private MitemDB itemDB;
+    public static MitemDB itemDB;
     private List<CheckMessage> items= new ArrayList<>();
 
     //three
-    private String MyName = "CC";
+    private String MyName = "USERv";//Guest";
 
     //json
     private String JSONString;
@@ -123,19 +124,30 @@ public class BluetoothChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+
         // 建立資料庫物件
         itemDB = new MitemDB(getActivity().getApplicationContext());
         // 如果資料庫是空的，就建立一些範例資料
         // 這是為了方便測試用的，完成應用程式以後可以拿掉
-        if (itemDB.getCount() == 0) {
+        /*if (itemDB.getCount() == 0) {
             itemDB.sample();
-        }
+        }*/
+
         // 取得所有記事資料
         items = itemDB.getAll();
+
+        /*for(CheckMessage i : items){
+            itemDB.delete(i.getId());
+        }
+        items.clear();*/
+
+        //itemDB.sample();
         // Get local Bluetooth adapter
 
         //Toast.makeText(getActivity(), "onCreat.", Toast.LENGTH_LONG).show();
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothManager mBluetoothManager = (BluetoothManager) getActivity().getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+        MyName = mBluetoothAdapter.getName();
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
@@ -143,7 +155,8 @@ public class BluetoothChatFragment extends Fragment {
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
-        XMPPconnect();
+
+        //XMPPconnect();
 
     }
 
@@ -175,6 +188,7 @@ public class BluetoothChatFragment extends Fragment {
             mChatService.stop();
             mChatService = null;
         }
+        stopAdvertising();
 
     }
 
@@ -248,7 +262,7 @@ public class BluetoothChatFragment extends Fragment {
      */
     private void setupChat() {
         Log.d(TAG, "setupChat()");
-
+        startAdvertising();
         // Initialize the array adapter for the conversation thread
         mdata = LoadData();
 
@@ -404,7 +418,7 @@ public class BluetoothChatFragment extends Fragment {
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                            //mConversationArrayAdapter.clear();
+                            //ArrayAdapter.clear();
                             //mdata.clear();
                             //mConversationArrayAdapter.Refresh();
                             break;
@@ -432,12 +446,33 @@ public class BluetoothChatFragment extends Fragment {
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     String rMessage = readMessage.split("##")[1];
-                    CheckMessage tmp = new CheckMessage(0, Long.parseLong(readMessage.split("##")[2]), CheckMessage.MessageType_To, readMessage.split("##")[0], rMessage);
+                    CheckMessage tmp;
+
+                    try {
+                        if ((filter(Long.parseLong(readMessage.split("##")[2]), readMessage.split("##")[0])))
+                            break;
+                    }catch (Exception ex){
+
+                        Log.e(TAG, "Error: " + readMessage);
+                        break;
+                    }
+                    if(readMessage.split("##")[0].equals(MyName)&&(!MyName.equals("Guest"))){
+                        tmp = new CheckMessage(0, Long.parseLong(readMessage.split("##")[2]), CheckMessage.MessageType_From,
+                                readMessage.split("##")[0], rMessage);
+                    }
+                    else{
+                        tmp = new CheckMessage(0, Long.parseLong(readMessage.split("##")[2]), CheckMessage.MessageType_To,
+                                readMessage.split("##")[0], rMessage);
+                    }
                     itemDB.insert(tmp);
                     mdata.add(tmp);
+
+                    //relay!?
                     if(XMPPing){
-                        mXMPPService.write(readMessage);
+                        mXMPPService.relaying(readMessage);
                     }
+                    mChatService.relaying(readMessage);
+
                     mConversationArrayAdapter.Refresh();
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
@@ -456,24 +491,42 @@ public class BluetoothChatFragment extends Fragment {
                     break;
                 case Constants.MESSAGE_XMPP_READ:
                     String read = (String) msg.obj;
-                    if(read.split("##").length == 1){
+                    if(read.split("##").length < 3){
                         read = "unknownXMPP##"+read+"##0";
                     }
                     String rread = read.split("##")[1];
-                    CheckMessage ttmp = new CheckMessage(0, Long.parseLong(read.split("##")[2]), CheckMessage.MessageType_To, read.split("##")[0], rread);
+                    CheckMessage ttmp;
+
+                    if ((filter(Long.parseLong(read.split("##")[2]),read.split("##")[0])) )
+                        break;
+
+                    if(read.split("##")[0].equals(MyName)&&(!MyName.equals("Guest"))) {
+                        ttmp = new CheckMessage(0, Long.parseLong(read.split("##")[2]), CheckMessage.MessageType_From,
+                                read.split("##")[0], rread);
+                    }
+                    else{
+                        ttmp = new CheckMessage(0, Long.parseLong(read.split("##")[2]), CheckMessage.MessageType_To,
+                                read.split("##")[0], rread);
+                    }
                     itemDB.insert(ttmp);
                     mdata.add(ttmp);
+
+                    //relay!?
                     if(mChatService.getState() == BluetoothChatService.STATE_CONNECTED) {
                         // Get the message bytes and tell the BluetoothChatService to write
                         //byte[] Xsend = read.getBytes();
-                        mChatService.write(read);
+                        mChatService.relaying(read);
                     }
+
                     mConversationArrayAdapter.Refresh();
                     break;
                 case Constants.MESSAGE_XMPP_WRITE:
+
+                    //avoid UI dup
                     if(mChatService.getState()==BluetoothChatService.STATE_CONNECTED){
                         break;
                     }
+
                     String write = (String) msg.obj;
                     String wwrite = write.split("##")[1];
                     mdata.add(new CheckMessage(0, Long.parseLong(write.split("##")[2]), CheckMessage.MessageType_From, MyName, wwrite));
@@ -527,6 +580,7 @@ public class BluetoothChatFragment extends Fragment {
                 if (resultCode == Activity.RESULT_OK){
                     username = data.getExtras().getString("USER");
                     password = data.getExtras().getString("PW");
+                    MyName = data.getExtras().getString("NAME");
                     XMPPconnect();
                 }
                 break;
@@ -582,6 +636,16 @@ public class BluetoothChatFragment extends Fragment {
                 startActivityForResult(serverIntent, REQUEST_XMPP_CONNECT);
                 return true;
             }
+            case R.id.DB_Clear: {
+                for(CheckMessage i : items){
+                    itemDB.delete(i.getId());
+                }
+                items.clear();
+                mdata = LoadData();
+                mConversationArrayAdapter.Refresh();
+
+                return true;
+            }
         }
         return false;
     }
@@ -609,13 +673,14 @@ public class BluetoothChatFragment extends Fragment {
                 Toast.makeText(getActivity(), "Finish.", Toast.LENGTH_SHORT).show();
                 getActivity().unregisterReceiver(receiver);
                 if(!device.isEmpty()){
-                    Autochat();
+                    //Autochat();
                 }
 
             }
 
         }
     };
+    /*
     private synchronized void Autochat() {
         boolean cflag = false;
         Toast.makeText(getActivity(), "In auto.", Toast.LENGTH_SHORT).show();
@@ -658,9 +723,9 @@ public class BluetoothChatFragment extends Fragment {
 
             }
             //device.clear();
-            lock = false;*/
+            lock = false;
         }
-    }
+    }*/
     private void doDiscovery(){
         if (mBluetoothAdapter.isDiscovering()) {
             mBluetoothAdapter.cancelDiscovery();
@@ -674,6 +739,9 @@ public class BluetoothChatFragment extends Fragment {
     public void XMPPconnect(){
         //MainActivity.check = true;
         mXMPPService = new XMPPService(getActivity(), mHandler, username, password);
+
+        //chatroomtest
+        XMPPing = true;
     }
 
     private void connectXMPPUser(Intent data){
@@ -691,6 +759,15 @@ public class BluetoothChatFragment extends Fragment {
         //mXMPPname = account.split("@")[0];
 
     }
+    public boolean filter(Long time, String name){
+
+        return itemDB.Check(time,name);
+
+    }
+
+    public void relay(){
+
+    }
 
 /*
     public void setReceive(AbstractXMPPConnection connect) {
@@ -702,4 +779,22 @@ public class BluetoothChatFragment extends Fragment {
             }
         });
     }*/
+
+    private void startAdvertising() {
+        Log.d(TAG, "Start fragment.");
+        Context c = getActivity();
+        c.startService(getServiceIntent(c));
+    }
+
+
+    private void stopAdvertising() {
+        Log.d(TAG, "Stop fragment.");
+        Context c = getActivity();
+        c.stopService(getServiceIntent(c));
+
+    }
+
+    private static Intent getServiceIntent(Context c) {
+        return new Intent(c, AdvertiserService.class);
+    }
 }
