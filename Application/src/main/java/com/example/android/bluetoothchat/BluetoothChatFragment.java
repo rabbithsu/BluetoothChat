@@ -103,9 +103,9 @@ public class BluetoothChatFragment extends Fragment {
     //auto
     ArrayList<BluetoothDevice> device = new ArrayList<BluetoothDevice>();
     //XMPP
-    public static XMPPService mXMPPService = null;
-    private  boolean XMPPing = false;
-    private  String mXMPPname = null;
+    public static XMPPChatService mXMPPService = null;
+    public static boolean XMPPing = false;
+    private  String mXMPPname = "ABCC";
     private  String username = "rabbithsuqqq";
     private  String password = "123456";
 
@@ -156,7 +156,7 @@ public class BluetoothChatFragment extends Fragment {
             activity.finish();
         }
 
-        //XMPPconnect();
+
 
     }
 
@@ -263,6 +263,8 @@ public class BluetoothChatFragment extends Fragment {
     private void setupChat() {
         Log.d(TAG, "setupChat()");
         startAdvertising();
+        if(mXMPPService== null)
+            XMPPconnect();
         // Initialize the array adapter for the conversation thread
         mdata = LoadData();
 
@@ -632,8 +634,10 @@ public class BluetoothChatFragment extends Fragment {
                 return true;
             }
             case R.id.xmpp_connect: {
-                Intent serverIntent = new Intent(getActivity(), XMPPListActivity.class);
-                startActivityForResult(serverIntent, REQUEST_XMPP_CONNECT);
+                XMPPconnect();
+
+                //Intent serverIntent = new Intent(getActivity(), XMPPListActivity.class);
+                //startActivityForResult(serverIntent, REQUEST_XMPP_CONNECT);
                 return true;
             }
             case R.id.DB_Clear: {
@@ -738,7 +742,7 @@ public class BluetoothChatFragment extends Fragment {
     //XMPP
     public void XMPPconnect(){
         //MainActivity.check = true;
-        mXMPPService = new XMPPService(getActivity(), mHandler, username, password);
+        mXMPPService = new XMPPChatService(getActivity(), mHandler, username, password);
 
         //chatroomtest
         XMPPing = true;
@@ -755,7 +759,7 @@ public class BluetoothChatFragment extends Fragment {
         //mdata.clear();
         //mConversationArrayAdapter.Refresh();
 
-        mXMPPService.startchat(account);
+        //mXMPPService.startchat(account);
         //mXMPPname = account.split("@")[0];
 
     }
@@ -769,16 +773,6 @@ public class BluetoothChatFragment extends Fragment {
 
     }
 
-/*
-    public void setReceive(AbstractXMPPConnection connect) {
-        //connection = connection;
-        Chat chat = ChatManager.getInstanceFor(connect).createChat("jsmith@jivesoftware.com", new MessageListener() {
-            @Override
-            public void processMessage(Message message) {
-                System.out.println("Received message: " + message);
-            }
-        });
-    }*/
 
     private void startAdvertising() {
         Log.d(TAG, "Start fragment.");
