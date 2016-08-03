@@ -708,7 +708,7 @@ public class BluetoothChatService{
 
     public void scanstart(){
         autoing = false;
-        startScanning();
+        //startScanning();
     }
 
     public void startScanning() {

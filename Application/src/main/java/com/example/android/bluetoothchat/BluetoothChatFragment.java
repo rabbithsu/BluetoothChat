@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -39,11 +40,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewAnimator;
 
 import com.example.android.common.logger.Log;
 
@@ -116,6 +122,12 @@ public class BluetoothChatFragment extends Fragment {
     //three
     private String MyName = "USERv";//Guest";
 
+    //gchat
+    public static ArrayList<String> RoomList = new ArrayList<String>();
+    public static ListView listView;
+    public static List<String> Grouplist;
+    private ArrayAdapter<String> listAdapter;
+
     //json
     private String JSONString;
 
@@ -147,7 +159,7 @@ public class BluetoothChatFragment extends Fragment {
         //Toast.makeText(getActivity(), "onCreat.", Toast.LENGTH_LONG).show();
         BluetoothManager mBluetoothManager = (BluetoothManager) getActivity().getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
-        MyName = mBluetoothAdapter.getName();
+        MyName = "Nexus 1";
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
@@ -254,7 +266,20 @@ public class BluetoothChatFragment extends Fragment {
         mConversationView =(ListView) view.findViewById(R.id.chat);
         mOutEditText = (EditText) view.findViewById(R.id.edit_text_out);
         mSendButton = (Button) view.findViewById(R.id.button_send);
-
+        //Fragment LogFragment = BluetoothChatFragment.this.getFragmentManager().findFragmentById(R.id.log_fragment);
+        //ViewAnimator LogAnimator =
+        listView = (ListView) getActivity().findViewById(R.id.sample_output).findViewById(R.id.sample);
+        listAdapter = new ArrayAdapter<String>(getActivity(), R.layout.chat_name);
+        listView.setAdapter(listAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String info = ((TextView) view).getText().toString().split("\n")[0];
+                Toast.makeText(getActivity(), info, Toast.LENGTH_SHORT).show();
+                mXMPPService.joinRoom(MyName, "", info);
+                mConnectedDeviceName = "Room: " + info;
+            }
+        });
     }
 
     /**
@@ -299,6 +324,8 @@ public class BluetoothChatFragment extends Fragment {
         //startActivityForResult(serverIntent, REQUEST_XMPP_LOGIN);
         //XMPPconnect();
         mChatService.start();
+
+
         //try auto
         //Toast.makeText(getActivity(), "Start try.", Toast.LENGTH_SHORT).show();
         //doDiscovery();
@@ -451,7 +478,7 @@ public class BluetoothChatFragment extends Fragment {
                     CheckMessage tmp;
 
                     try {
-                        if ((filter(Long.parseLong(readMessage.split("##")[2]), readMessage.split("##")[0])))
+                        if ((filter(Long.parseLong(readMessage.split("##")[2]), readMessage.split("##")[0], readMessage.split("##")[1])))
                             break;
                     }catch (Exception ex){
 
@@ -499,7 +526,7 @@ public class BluetoothChatFragment extends Fragment {
                     String rread = read.split("##")[1];
                     CheckMessage ttmp;
 
-                    if ((filter(Long.parseLong(read.split("##")[2]),read.split("##")[0])) )
+                    if ((filter(Long.parseLong(read.split("##")[2]),read.split("##")[0], read.split("##")[1])) )
                         break;
 
                     if(read.split("##")[0].equals(MyName)&&(!MyName.equals("Guest"))) {
@@ -743,9 +770,20 @@ public class BluetoothChatFragment extends Fragment {
     public void XMPPconnect(){
         //MainActivity.check = true;
         mXMPPService = new XMPPChatService(getActivity(), mHandler, username, password);
+        while(!XMPPing){
+
+        }
+        RoomList = mXMPPService.getConferenceRoom();
+        Log.d(TAG, "Listtt\n\n\n");
+        for(String l : RoomList){
+            Log.d(TAG, l);
+            listAdapter.add(l);
+            //list.setText(list.getText() + "\n" + l);
+        }
+        Log.d(TAG, "\nEnddd\n");
 
         //chatroomtest
-        XMPPing = true;
+        //XMPPing = true;
     }
 
     private void connectXMPPUser(Intent data){
@@ -763,9 +801,9 @@ public class BluetoothChatFragment extends Fragment {
         //mXMPPname = account.split("@")[0];
 
     }
-    public boolean filter(Long time, String name){
+    public boolean filter(Long time, String name, String content){
 
-        return itemDB.Check(time,name);
+        return itemDB.Check(time, name, content);
 
     }
 

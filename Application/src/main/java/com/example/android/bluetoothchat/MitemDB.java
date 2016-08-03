@@ -213,11 +213,11 @@ public class MitemDB {
         insert(item3);
         insert(item4);
     }
-    public Boolean Check(Long time, String name) {
+    public Boolean Check(Long time, String name, String content) {
         //  long result = 0;
         // Boolean timeRight = true;
         // Boolean nameRight = true;
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE datetime=" + time + " AND " + "name='" + name + "'", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE datetime=" + time + " AND " + "name='" + name + "' AND " + "content='" + content+ "'", null);
         if(cursor.getCount()==0){
             Log.d("DB", "Accept.");
             return false;

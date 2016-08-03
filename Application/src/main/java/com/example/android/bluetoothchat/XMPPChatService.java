@@ -62,6 +62,14 @@ public class XMPPChatService {
     public static String PASSWORD;
     public static MultiUserChat MultiChatroom;
     private ArrayList<String> messages = new ArrayList<String>();
+    public static ArrayList<String> GChatRoom = new ArrayList<String>();
+
+    //state
+    // Constants that indicate the current connection state
+    public static final int STATE_NONE = 0;       // we're doing nothing
+    public static final int STATE_LISTEN = 1;     // now listening for incoming connections
+    public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
+    public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
 
 
@@ -153,14 +161,18 @@ public class XMPPChatService {
 
                 //chatroomtest
                 try {
-                    if(BluetoothChatFragment.XMPPing){
-                        startchat("all@broadcast.140.119.164.18");
-                        /*MultiChatroom = joinMultiUserChat("tester1", "", "hi", connection);
-                        MultiChatroom.addMessageListener( new  multiListener());*/
+                    if(connection != null){
+                        //startchat("all@broadcast.140.119.164.18");
+                        //MultiChatroom = joinMultiUserChat("tester2", "", "1", connection);
+
+                        //joinMultiUserChat();
+                       // MultiChatroom.addMessageListener( new  multiListener());
+                        //MultiChatroom.leave();
                     }
                 }catch (Exception e){
                     Log.d("XMPPChatDemoActivity", e.toString());
                 }
+                BluetoothChatFragment.XMPPing = true;
 
                 //dialog.dismiss();
             }
@@ -177,7 +189,7 @@ public class XMPPChatService {
 
         // Perform the write unsynchronized
         try {
-            XMPPchat.sendMessage(out);
+            //XMPPchat.sendMessage(out);
             MultiChatroom.sendMessage(out);
             mHandler.obtainMessage(Constants.MESSAGE_XMPP_WRITE, -1, -1, out)
                     .sendToTarget();
@@ -202,6 +214,13 @@ public class XMPPChatService {
     public void startchat(String account){
         Log.d(TAG, account);
         new XMPPThread(account);
+    }
+
+    private synchronized void setState(int state) {
+        Log.d(TAG, "setState() "  + " -> " + state);
+
+        // Give the new state to the Handler so the UI Activity can update
+        mHandler.obtainMessage(Constants.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
 
@@ -306,6 +325,28 @@ public class XMPPChatService {
         }
     }
 
+
+    /**
+     *
+     * Call join
+     */
+
+    public void joinRoom(String user, String password, String roomsName){
+        try{
+            if(MultiChatroom != null){
+                MultiChatroom.leave();
+                MultiChatroom = null;
+            }
+            MultiChatroom = joinMultiUserChat(user, password, roomsName, connection);
+            MultiChatroom.addMessageListener( new  multiListener());
+            setState(STATE_CONNECTED);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
     /**
      * To join the conference room
      *
@@ -364,37 +405,44 @@ public class XMPPChatService {
      * @return
      * @throws XMPPException
      */
-    /*
-    public static List<FriendRooms> getConferenceRoom() throws XMPPException {
-        List<FriendRooms> list = new ArrayList<FriendRooms>();
-        new ServiceDiscoveryManager(connection);
-        if (!MultiUserChat.getHostedRooms(connection,
-                connection.getServiceName()).isEmpty()) {
 
-            for (HostedRoom k : MultiUserChat.getHostedRooms(connection,
-                    connection.getServiceName())) {
+    public static ArrayList<String> getConferenceRoom(){// throws XMPPException {
+        ArrayList<String> GroupRoom = new ArrayList<String>();
+        /*List<FriendRooms> list = new ArrayList<FriendRooms>();
+        new ServiceDiscoveryManager(connection);*/
+        //if (!MultiUserChat.getHostedRooms(connection,
+        //        connection.getServiceName()).isEmpty()) {
+            try {
+                MultiUserChatManager muc = MultiUserChatManager.getInstanceFor(connection);
+                muc.getHostedRooms("140.119.164.18");
+                //muc.get
+                for (HostedRoom k : muc.getHostedRooms("conference.140.119.164.18")) {
+                    GroupRoom.add(k.getName()+"\n"+k.getJid());
 
-                for (HostedRoom j : MultiUserChat.getHostedRooms(connection,
-                        k.getJid())) {
-                    RoomInfo info2 = MultiUserChat.getRoomInfo(connection,
-                            j.getJid());
-                    if (j.getJid().indexOf("@") > 0) {
+                    /*for (HostedRoom j : muc.getHostedRooms(connection,
+                            k.getJid())) {
+                        RoomInfo info2 = MultiUserChat.getRoomInfo(connection,
+                                j.getJid());
+                        if (j.getJid().indexOf("@") > 0) {
 
-                        FriendRooms friendrooms = new FriendRooms();
-                        friendrooms.setName(j.getName());//The name of the chat room
-                        friendrooms.setJid(j.getJid());//JID chat room
-                        friendrooms.setOccupants(info2.getOccupantsCount());//The quantity of the chat room in
-                        friendrooms.setDescription(info2.getDescription());//Chat room description
-                        friendrooms.setSubject(info2.getSubject());//Chat Theme
-                        list.add(friendrooms);
-                    }
+                            FriendRooms friendrooms = new FriendRooms();
+                            friendrooms.setName(j.getName());//The name of the chat room
+                            friendrooms.setJid(j.getJid());//JID chat room
+                            friendrooms.setOccupants(info2.getOccupantsCount());//The quantity of the chat room in
+                            friendrooms.setDescription(info2.getDescription());//Chat room description
+                            friendrooms.setSubject(info2.getSubject());//Chat Theme
+                            list.add(friendrooms);
+                        }
+                    }*/
                 }
+            }catch (Exception e){
+                e.printStackTrace();
             }
-        }
-        return list;
+        //}
+        return GroupRoom;
     }
 
-    */
+
 
     /**
      * The meeting room information monitoring events

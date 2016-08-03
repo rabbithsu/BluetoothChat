@@ -27,22 +27,14 @@
           android:layout_height="0px"
           android:layout_weight="1">
 
-        <!--<ScrollView
-              style="@style/Widget.SampleMessageTile"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">-->
 
-            <TextView
+            <ListView
                   style="@style/Widget.SampleMessage"
                   android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center"
-                  android:paddingLeft="@dimen/horizontal_page_margin"
-                  android:paddingRight="@dimen/horizontal_page_margin"
-                  android:paddingTop="@dimen/vertical_page_margin"
-                  android:paddingBottom="@dimen/vertical_page_margin"
-                  android:text="@string/sample" />
-        <!--</ScrollView>-->
+                  android:layout_height="match_parent"
+                  android:text="@string/sample"
+                  android:id="@+id/sample"/>
+
 
         <fragment
               android:name="com.example.android.common.logger.LogFragment"
@@ -56,7 +48,7 @@
     <View
           android:layout_width="match_parent"
           android:layout_height="1dp"
-          android:background="@android:color/darker_gray" />
+          android:background="@android:color/black" />
 
     <FrameLayout
           android:id="@+id/sample_content_fragment"
