@@ -25,7 +25,9 @@ public class LoginXMPPActivity extends Activity {
 
     private EditText UserEditText;
     private EditText PwEditText;
+    private EditText NewEditText;
     private Button SigninButton;
+    private Button SignupButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,8 @@ public class LoginXMPPActivity extends Activity {
         // Set content
         UserEditText = (EditText) findViewById(R.id.editText);
         PwEditText = (EditText) findViewById(R.id.editText2);
+        NewEditText = (EditText) findViewById(R.id.editText3);
+
         SigninButton = (Button) findViewById(R.id.button);
         SigninButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -57,11 +61,28 @@ public class LoginXMPPActivity extends Activity {
             }
         });
 
+        SignupButton = (Button) findViewById(R.id.button);
+        SignupButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Send a message using content of the edit text widget
+                TextView userview = (TextView) findViewById(R.id.editText);
+                TextView pwview = (TextView) findViewById(R.id.editText2);
+                TextView nameview = (TextView) findViewById(R.id.editText3);
+                String username = userview.getText().toString();
+                String pw = pwview.getText().toString();
+                String name = nameview.getText().toString();
+                //pwview.setText("");
+                Signup(username, pw, name);
+
+            }
+        });
+
     }
     private void Login(String u, String p, String n){
         final String username = u;
         final String pw = p;
         final String name = n;
+        /*
         Thread t = new Thread(new Runnable() {
 
             @Override
@@ -78,14 +99,16 @@ public class LoginXMPPActivity extends Activity {
 
 
                 //config.setSASLAuthenticationEnabled(false);
-                connection = new XMPPTCPConnection(config.build());
+                connection = new XMPPTCPConnection(config.build());*/
                 try {
 
-                    connection.connect();
+                    /*connection.connect();
                     Log.d(TAG, "Connected to " + connection.getHost());
-                    connection.disconnect();
+                    connection.disconnect();*/
                     //PwEditText.setText("");
                     // Create the result Intent and include the MAC address
+                    BluetoothChatFragment.mMessageHandler = new MessageHandler(this.getApplication(), BluetoothChatFragment.itemDB, username);
+                    BluetoothChatFragment.mXMPPService = new XMPPChatService(this.getApplication(), BluetoothChatFragment.mMessageHandler.getHandler(), username, pw, true);
                     Intent intent = new Intent();
                     intent.putExtra("USER", username);
                     intent.putExtra("PW", pw);
@@ -96,14 +119,35 @@ public class LoginXMPPActivity extends Activity {
                     finish();
                 } catch (Exception ex) {
                     //PwEditText.setText("NO");
-                    Log.d(TAG, "Failed to connect to "
-                            + connection.getHost());
+                    Log.d(TAG, "Failed to connect to ");
+                            //+ connection.getHost());
                     Log.d(TAG, ex.toString());
                 }
-            }});
-        t.start();
 
 
+
+    }
+
+    private void Signup(String u, String p, String n){
+        final String username = u;
+        final String pw = p;
+        final String name = n;
+        try{
+            BluetoothChatFragment.mMessageHandler = new MessageHandler(this.getApplication(), BluetoothChatFragment.itemDB, username);
+            //BluetoothChatFragment.mXMPPService = new XMPPChatService(this.getApplication(), BluetoothChatFragment.mMessageHandler.getHandler(), username, pw, true);
+            BluetoothChatFragment.mXMPPService = new XMPPChatService(this.getApplication(), BluetoothChatFragment.mMessageHandler.getHandler(), username, pw, false);
+            Intent intent = new Intent();
+            intent.putExtra("USER", username);
+            intent.putExtra("PW", pw);
+            intent.putExtra("NAME", name);
+
+            // Set result and finish this Activity
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

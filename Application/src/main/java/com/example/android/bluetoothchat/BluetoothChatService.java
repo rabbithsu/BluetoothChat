@@ -27,10 +27,13 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.app.Service;
+import android.support.annotation.Nullable;
 import android.widget.Toast;
 
 import com.example.android.common.logger.Log;
@@ -49,7 +52,7 @@ import java.util.concurrent.TimeUnit;
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
-public class BluetoothChatService{
+public class BluetoothChatService extends Service{
     // Debugging
     private static final String TAG = "BluetoothChatService";
 
@@ -97,11 +100,11 @@ public class BluetoothChatService{
      * @param context The UI Activity Context
      * @param handler A Handler to send messages back to the UI Activity
      */
-    public BluetoothChatService(Context context, Handler handler) {
+    public BluetoothChatService(Context context, MessageHandler handler) {
         mAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE))
                 .getAdapter();
         mState = STATE_NONE;
-        mHandler = handler;
+        mHandler = handler.getHandler();
         BTname = mAdapter.getName();
         //
         mScanHandler = new Handler();
@@ -359,6 +362,12 @@ public class BluetoothChatService{
 
         // Start the service over to restart listening mode
         BluetoothChatService.this.start();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     /**

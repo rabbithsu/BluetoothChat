@@ -36,10 +36,12 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -50,22 +52,42 @@
             android:name=".DeviceListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/select_device"
-            android:theme="@android:style/Theme.Holo.Dialog"/>
+            android:theme="@android:style/Theme.Holo.Dialog"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".XMPPListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/select_device"
-            android:theme="@android:style/Theme.Holo.Dialog"/>
+            android:theme="@android:style/Theme.Holo.Dialog"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".LoginXMPPActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/login"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="ChatWindows"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/contact"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name="GroupChatWindows"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/contact"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
+
         <service
             android:name=".AdvertiserService"
             android:enabled="true"
             android:exported="false" >
         </service>
+
 
     </application>
 

@@ -8,6 +8,7 @@ public class CheckMessage {
     public static final int MessageType_Time=0;
     public static final int MessageType_From=1;
     public static final int MessageType_To=2;
+    public static final int MessageType_Broadcast=3;
 
     /*public CheckMessage(int Type,String Content)
     {
@@ -21,14 +22,27 @@ public class CheckMessage {
         this.time = time;
         this.mType = Type;
         this.name = name;
-        this.mContent=Content;
+        this.mContent = Content;
+        this.GroupName = null;
     }
+
+    public CheckMessage(long id, long time, int Type,String name, String Content, String Gname)
+    {
+        this.id = id;
+        this.time = time;
+        this.mType = Type;
+        this.name = name;
+        this.mContent=Content;
+        this.GroupName = Gname;
+    }
+
 
     private long id;
     private long time;
     private int mType;
     private String name;
     private String mContent;
+    private String GroupName;
 
 
     public long getId(){
@@ -60,5 +74,11 @@ public class CheckMessage {
     }
     public void setContent(String mContent) {
         this.mContent = mContent;
+    }
+    public String getGroupName(){
+        return GroupName;
+    }
+    public void setGroupName(String n){
+        this.GroupName = n;
     }
 }

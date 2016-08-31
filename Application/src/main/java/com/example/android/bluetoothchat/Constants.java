@@ -31,6 +31,11 @@ public interface Constants {
     public static final int MESSAGE_TOAST = 5;
     public static final int MESSAGE_XMPP_READ = 6;
     public static final int MESSAGE_XMPP_WRITE = 7;
+    public static final int MESSAGE_XMPP_GROUPWRITE = 8;
+    public static final int MESSAGE_XMPP_GROUPREAD = 9;
+
+    public static final int MESSAGE_ONLINE = 98;
+    public static final int MESSAGE_OFFLINE = 99;
 
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
@@ -38,5 +43,7 @@ public interface Constants {
     public static final ParcelUuid Service_UUID = ParcelUuid
     //.fromString("");
             .fromString("0000b81d-0000-1000-8000-00805f9b34fb");
+    public static final String ChatTableName = "item";
+    public static final String GroupTableName = "gitem";
 
 }

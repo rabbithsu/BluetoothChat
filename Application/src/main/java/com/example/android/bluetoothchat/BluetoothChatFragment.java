@@ -77,6 +77,8 @@ public class BluetoothChatFragment extends Fragment {
 
     // Layout Views
     ListView mConversationView;
+    private ArrayAdapter<String> FriendlistAdapter;
+
     private EditText mOutEditText;
     private Button mSendButton;
 
@@ -112,7 +114,7 @@ public class BluetoothChatFragment extends Fragment {
     public static XMPPChatService mXMPPService = null;
     public static boolean XMPPing = false;
     private  String mXMPPname = "ABCC";
-    private  String username = "rabbithsuqqq";
+    private  String username = "customer2";
     private  String password = "123456";
 
     //DB
@@ -120,21 +122,27 @@ public class BluetoothChatFragment extends Fragment {
     private List<CheckMessage> items= new ArrayList<>();
 
     //three
-    private String MyName = "USERv";//Guest";
+    public static String MyName = "USERv";//Guest";
 
     //gchat
     public static ArrayList<String> RoomList = new ArrayList<String>();
-    public static ListView listView;
+    public static ListView GlistView;
     public static List<String> Grouplist;
-    private ArrayAdapter<String> listAdapter;
+    private ArrayAdapter<String> GlistAdapter;
+    public static boolean BTmode = false;
 
     //json
     private String JSONString;
+
+    //Message handle
+    public static MessageHandler mMessageHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        Log.d(TAG, "onCreate.");
+
 
 
         // 建立資料庫物件
@@ -144,6 +152,7 @@ public class BluetoothChatFragment extends Fragment {
         /*if (itemDB.getCount() == 0) {
             itemDB.sample();
         }*/
+
 
         // 取得所有記事資料
         items = itemDB.getAll();
@@ -159,7 +168,7 @@ public class BluetoothChatFragment extends Fragment {
         //Toast.makeText(getActivity(), "onCreat.", Toast.LENGTH_LONG).show();
         BluetoothManager mBluetoothManager = (BluetoothManager) getActivity().getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
-        MyName = "Nexus 1";
+        MyName = mBluetoothAdapter.getName();
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
@@ -176,6 +185,7 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart.");
         //Toast.makeText(getActivity(), "onStart.", Toast.LENGTH_LONG).show();
         // If BT is not on, request that it be enabled.
         // setupChat() will then be called during onActivityResult
@@ -207,12 +217,35 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume.");
+
         //Toast.makeText(getActivity(), "onResume.", Toast.LENGTH_LONG).show();
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
         //getActivity().registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
         //getActivity().registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+        if(mXMPPService != null){
+            RoomList = mXMPPService.getConferenceRoom();
+            GlistAdapter.clear();
+            Log.d(TAG, "Room List:\n\n");
+            for(String l : RoomList){
+                Log.d(TAG, l);
+                GlistAdapter.add(l);
+                //list.setText(list.getText() + "\n" + l);
+            }
+            Log.d(TAG, "Friend List:\n\n");
+            ArrayList<String> tmpList = mXMPPService.getRoster();
+            FriendlistAdapter.clear();
+            for(String tmp : tmpList){
+                Log.d(TAG, tmp);
+                FriendlistAdapter.add(tmp);
+            }
+        }else{
+            Intent serverIntent = new Intent(getActivity(), LoginXMPPActivity.class);
+            startActivityForResult(serverIntent, REQUEST_XMPP_LOGIN);
+        }
+
         if (mChatService != null) {
 
             // Only if the state is STATE_NONE, do we know that we haven't started already
@@ -228,7 +261,7 @@ public class BluetoothChatFragment extends Fragment {
 
         }
         else {
-            setupChat();
+        //    setupChat();
         }
 
 
@@ -257,27 +290,51 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_bluetooth_chat, container, false);
+        return inflater.inflate(R.layout.fragment_chat_select, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //mConversationView = (ListView) view.findViewById(R.id.chat);
-        mConversationView =(ListView) view.findViewById(R.id.chat);
-        mOutEditText = (EditText) view.findViewById(R.id.edit_text_out);
-        mSendButton = (Button) view.findViewById(R.id.button_send);
-        //Fragment LogFragment = BluetoothChatFragment.this.getFragmentManager().findFragmentById(R.id.log_fragment);
-        //ViewAnimator LogAnimator =
-        listView = (ListView) getActivity().findViewById(R.id.sample_output).findViewById(R.id.sample);
-        listAdapter = new ArrayAdapter<String>(getActivity(), R.layout.chat_name);
-        listView.setAdapter(listAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        //freind list
+        mConversationView =(ListView) view.findViewById(R.id.friend_list);
+        FriendlistAdapter = new ArrayAdapter<String>(getActivity(), R.layout.chat_name);
+        mConversationView.setAdapter(FriendlistAdapter);
+        mConversationView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent serverIntent = new Intent(getActivity(), ChatWindows.class);
+                String info = ((TextView) view).getText().toString();
+                String account = info.split("\n")[0];
+
+                Toast.makeText(getActivity(), account, Toast.LENGTH_SHORT).show();
+
+                serverIntent.putExtra("account", account);
+                serverIntent.putExtra("username", username);
+                startActivity(serverIntent);
+
+            }
+        });
+
+
+        //Chatroom list
+        GlistView = (ListView) getActivity().findViewById(R.id.sample_output).findViewById(R.id.sample);
+        GlistAdapter = new ArrayAdapter<String>(getActivity(), R.layout.chat_name);
+        GlistView.setAdapter(GlistAdapter);
+        GlistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent serverIntent = new Intent(getActivity(), GroupChatWindows.class);
                 String info = ((TextView) view).getText().toString().split("\n")[0];
                 Toast.makeText(getActivity(), info, Toast.LENGTH_SHORT).show();
-                mXMPPService.joinRoom(MyName, "", info);
+                //mXMPPService.joinRoom(MyName, "", info);
                 mConnectedDeviceName = "Room: " + info;
+
+
+                serverIntent.putExtra("account", info);
+                serverIntent.putExtra("username", username);
+                startActivity(serverIntent);
             }
         });
     }
@@ -287,11 +344,19 @@ public class BluetoothChatFragment extends Fragment {
      */
     private void setupChat() {
         Log.d(TAG, "setupChat()");
-        startAdvertising();
+
+
+
+        //測試先不用
+        //startAdvertising();
+
+
         if(mXMPPService== null)
             XMPPconnect();
+
+
         // Initialize the array adapter for the conversation thread
-        mdata = LoadData();
+        /*mdata = LoadData();
 
         mConversationArrayAdapter = new MessageAdapter(getActivity(), mdata);
 
@@ -312,10 +377,10 @@ public class BluetoothChatFragment extends Fragment {
                     sendMessage(message, MyName);
                 }
             }
-        });
+        });*/
 
         // Initialize the BluetoothChatService to perform bluetooth connections
-        mChatService = new BluetoothChatService(getActivity(), mHandler);
+        mChatService = new BluetoothChatService(getActivity(), mMessageHandler);
 
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
@@ -611,6 +676,12 @@ public class BluetoothChatFragment extends Fragment {
                     password = data.getExtras().getString("PW");
                     MyName = data.getExtras().getString("NAME");
                     XMPPconnect();
+                    setupChat();
+                }
+                else{
+                    Log.d(TAG, "No XmppLogIn");
+                    BTmode = true;
+                    setupChat();
                 }
                 break;
             default:
@@ -711,52 +782,8 @@ public class BluetoothChatFragment extends Fragment {
 
         }
     };
-    /*
-    private synchronized void Autochat() {
-        boolean cflag = false;
-        Toast.makeText(getActivity(), "In auto.", Toast.LENGTH_SHORT).show();
-        if (device.isEmpty()){
-            Toast.makeText(getActivity(), "Empty.", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            for(int count = 0; count < device.size(); count++) {
-                Toast.makeText(getActivity(), "Connecting.", Toast.LENGTH_SHORT).show();
-                cflag = mChatService.Autoconnect(device.get(count), false);
-                if(cflag) {
-                    Toast.makeText(getActivity(), "Success.", Toast.LENGTH_SHORT).show();
-                    device.clear();
-                    break;
-                }
-                //mChatService.failed();
-            }
-            Toast.makeText(getActivity(), "Fail.", Toast.LENGTH_SHORT).show();
-            if(!cflag){
-                Toast.makeText(getActivity(), "Set fails.", Toast.LENGTH_SHORT).show();
-                device.clear();
-                mChatService.failed();
-            }
 
-            /*while (!device.isEmpty()) {
 
-                if (mChatService.Autoconnect(device.remove(0), false)){
-                    //Toast.makeText(getActivity(), "break.", Toast.LENGTH_SHORT).show();
-                    device.clear();
-                    break;
-                }
-                else {
-                    //Toast.makeText(getActivity(), "Fail.", Toast.LENGTH_SHORT).show();
-                    if (device.isEmpty()) {
-                        mChatService.failed();
-                        //Toast.makeText(getActivity(), "Listen.", Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-
-            }
-            //device.clear();
-            lock = false;
-        }
-    }*/
     private void doDiscovery(){
         if (mBluetoothAdapter.isDiscovering()) {
             mBluetoothAdapter.cancelDiscovery();
@@ -766,21 +793,39 @@ public class BluetoothChatFragment extends Fragment {
         mBluetoothAdapter.startDiscovery();
     }
 
+    public String getName(){
+        return username;
+    }
+
     //XMPP
     public void XMPPconnect(){
         //MainActivity.check = true;
-        mXMPPService = new XMPPChatService(getActivity(), mHandler, username, password);
+        //mXMPPService = new XMPPChatService(getActivity(), mMessageHandler.getHandler(), username, password);
+        if (mXMPPService == null){
+            GlistAdapter.clear();
+            GlistAdapter.add("No connection");
+            FriendlistAdapter.clear();
+            FriendlistAdapter.add("No connection");
+            return;
+        }
         while(!XMPPing){
 
         }
         RoomList = mXMPPService.getConferenceRoom();
-        Log.d(TAG, "Listtt\n\n\n");
+        GlistAdapter.clear();
+        Log.d(TAG, "Room List:\n\n");
         for(String l : RoomList){
             Log.d(TAG, l);
-            listAdapter.add(l);
+            GlistAdapter.add(l);
             //list.setText(list.getText() + "\n" + l);
         }
-        Log.d(TAG, "\nEnddd\n");
+        Log.d(TAG, "Friend List:\n\n");
+        FriendlistAdapter.clear();
+        ArrayList<String> tmpList = mXMPPService.getRoster();
+        for(String tmp : tmpList){
+            Log.d(TAG, tmp);
+            FriendlistAdapter.add(tmp);
+        }
 
         //chatroomtest
         //XMPPing = true;

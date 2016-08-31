@@ -1,7 +1,11 @@
 package com.example.android.bluetoothchat;
 
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 import com.example.android.common.logger.Log;
 
@@ -27,6 +31,7 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.disco.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.iqregister.AccountManager;
 import org.jivesoftware.smackx.muc.DiscussionHistory;
 import org.jivesoftware.smackx.muc.HostedRoom;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -40,13 +45,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nccu_dct on 15/8/29.
  */
-public class XMPPChatService {
+public class XMPPChatService extends Service{
     private static final String TAG = "XMPPService";
     public static AbstractXMPPConnection connection;
     private final Handler mHandler;
@@ -60,6 +67,8 @@ public class XMPPChatService {
     public static final String SERVICE = "140.119.164.18";
     public static String USERNAME;
     public static String PASSWORD;
+    public static boolean Signup;
+    //private boolean Online = false;
     public static MultiUserChat MultiChatroom;
     private ArrayList<String> messages = new ArrayList<String>();
     public static ArrayList<String> GChatRoom = new ArrayList<String>();
@@ -73,11 +82,12 @@ public class XMPPChatService {
 
 
 
-    public XMPPChatService(Context context, Handler handler, String username, String pw) {
+    public XMPPChatService(Context context, Handler handler, String username, String pw, boolean s) {
         mHandler = handler;
         XMPPchat = null;
         USERNAME = username;
         PASSWORD = pw;
+        Signup = s;
         Thread t = new Thread(new Runnable() {
 
             @Override
@@ -87,7 +97,7 @@ public class XMPPChatService {
                 config.setServiceName(SERVICE);
                 config.setHost(HOST);
                 config.setPort(PORT);
-                //config.setUsernameAndPassword(USERNAME, PASSWORD);
+                config.setUsernameAndPassword(USERNAME, PASSWORD);
                 //config.setDebuggerEnabled(true);
                 config.setCompressionEnabled(false);
                 config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
@@ -98,20 +108,31 @@ public class XMPPChatService {
 
                 try {
                     connection.connect();
-                    Log.d("XMPPChatDemoActivity",
+
+                    if(Signup){
+                        AccountManager accountManager = AccountManager.getInstance(connection);
+                        Map<String, String> map = new HashMap<String, String>();
+                        map.put("username", "SignTest");
+                        map.put("password", "123456");
+                        map.put("email", "1@com");
+                        accountManager.createAccount("SignTest", "123456", map);
+                    }
+
+
+                    Log.d(TAG,
                             "Connected to " + connection.getHost());
                 } catch (Exception ex) {
                     BluetoothChatFragment.XMPPing = false;
-                    Log.d("XMPPChatDemoActivity", "Failed to connect to "
+                    Log.d(TAG, "Failed to connect to "
                             + connection.getHost());
-                    Log.d("XMPPChatDemoActivity", ex.toString());
+                    Log.d(TAG, ex.toString());
                     //connection = null;
                 }
                 try {
                     // SASLAuthentication.supportSASLMechanism("PLAIN", 0);
-                    connection.login();
+                    connection.login(USERNAME, "123456");
                     //connection.login(USERNAME, PASSWORD);
-                    Log.d("XMPPChatDemoActivity",
+                    Log.d(TAG,
                             "Logged in as " + connection.getUser());
 
                     // Set the status to available
@@ -127,7 +148,7 @@ public class XMPPChatService {
 
                     for (RosterEntry entry : entries) {
                         //System.out.println(entry);
-                        Log.d("XMPPChatDemoActivity", "USER:  "
+                        Log.d(TAG, "USER:  "
                                 + entry.getUser());
                         //Toast.makeText(getActivity(), entry.getName(), Toast.LENGTH_SHORT).show();
 
@@ -142,7 +163,7 @@ public class XMPPChatService {
                                         chat.addMessageListener(new ChatMessageListener() {
                                             @Override
                                             public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
-                                                Log.d("XMPPChatDemoActivity", "Receive: " + message.getBody());
+                                                Log.d(TAG, "Receive: " + message.getBody());
                                                 mHandler.obtainMessage(Constants.MESSAGE_XMPP_READ, message.getBody().length(), -1, message.getBody())
                                                         .sendToTarget();
                                             }
@@ -153,9 +174,9 @@ public class XMPPChatService {
                             });
                 } catch (Exception ex) {
                     BluetoothChatFragment.XMPPing = false;
-                    Log.d("XMPPChatDemoActivity", "Failed to log in as "
+                    Log.d(TAG, "Failed to log in as "
                             + USERNAME);
-                    Log.d("XMPPChatDemoActivity", ex.toString());
+                    Log.d(TAG, ex.toString());
                     connection = null;
                 }
 
@@ -170,7 +191,7 @@ public class XMPPChatService {
                         //MultiChatroom.leave();
                     }
                 }catch (Exception e){
-                    Log.d("XMPPChatDemoActivity", e.toString());
+                    Log.d(TAG, e.toString());
                 }
                 BluetoothChatFragment.XMPPing = true;
 
@@ -189,13 +210,26 @@ public class XMPPChatService {
 
         // Perform the write unsynchronized
         try {
-            //XMPPchat.sendMessage(out);
-            MultiChatroom.sendMessage(out);
-            mHandler.obtainMessage(Constants.MESSAGE_XMPP_WRITE, -1, -1, out)
-                    .sendToTarget();
+            XMPPchat.sendMessage(out);
+            //MultiChatroom.sendMessage(out);
+            //mHandler.obtainMessage(Constants.MESSAGE_XMPP_WRITE, -1, -1, out)
+            //        .sendToTarget();
         }
         catch (Exception ex){
             Log.d(TAG, "Send message failed.");
+        }
+    }
+
+    public void Groupwrite(String out) {
+        // Create temporary object
+
+        // Perform the write unsynchronized
+        try {
+            MultiChatroom.sendMessage(out);
+            //MultiChatroom.sendMessage(out);
+        }
+        catch (Exception ex){
+            Log.d(TAG, "Send Group message failed.");
         }
     }
 
@@ -207,7 +241,7 @@ public class XMPPChatService {
             XMPPchat.sendMessage(out);
         }
         catch (Exception ex){
-            Log.d(TAG, "Send message failed.");
+            Log.d(TAG, "Send relay message failed.");
         }
     }
 
@@ -221,6 +255,12 @@ public class XMPPChatService {
 
         // Give the new state to the Handler so the UI Activity can update
         mHandler.obtainMessage(Constants.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
 
@@ -239,7 +279,7 @@ public class XMPPChatService {
                     Chat chat = ChatManager.getInstanceFor(connection).createChat(USRID, new ChatMessageListener() {
                         @Override
                         public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
-                            Log.d("XMPPChatDemoActivity", "Receive: " + message.getBody());
+                            Log.d(TAG, "Receive Thread: " + message.getBody());
                             mHandler.obtainMessage(Constants.MESSAGE_XMPP_READ, message.getBody().length(), -1, message.getBody())
                                 .sendToTarget();
                             }
@@ -254,6 +294,42 @@ public class XMPPChatService {
         }
 
     }
+
+    /*
+    public void setOnline(){
+        Online = true;
+    }
+
+    public void setOffline(){
+        Online = false;
+    }
+    public boolean getOnline(){
+        return Online;
+    }*/
+
+    public ArrayList<String> getRoster(){
+        Roster roster = Roster.getInstanceFor(connection);
+        ArrayList<String> result = new ArrayList<>();
+        try{
+            if (!roster.isLoaded())
+                roster.reloadAndWait();
+        }
+        catch (Exception ex){
+
+        }
+        Collection<RosterEntry> entries = roster.getEntries();
+
+        for (RosterEntry entry : entries) {
+            //System.out.println(entry);
+            //Log.d(TAG, "USER:  "
+            //        + entry.getUser());
+            //Toast.makeText(getActivity(), entry.getName(), Toast.LENGTH_SHORT).show();/
+            result.add(entry.getUser() + "\n" + entry.getName());
+
+        }
+        return result;
+    }
+
 
     /**
      * Create a room
@@ -333,7 +409,7 @@ public class XMPPChatService {
 
     public void joinRoom(String user, String password, String roomsName){
         try{
-            if(MultiChatroom != null){
+            if (MultiChatroom != null){
                 MultiChatroom.leave();
                 MultiChatroom = null;
             }
@@ -457,19 +533,10 @@ public class XMPPChatService {
             //Message message = (Message) packek;
             // Received from the chat room chat message
             String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-            Log.d(TAG, message.getBody());
-            mHandler.obtainMessage(Constants.MESSAGE_XMPP_READ, message.getBody().length(), -1, message.getBody())
+            Log.d(TAG, "Listener get: " + message.getBody());
+            mHandler.obtainMessage(Constants.MESSAGE_XMPP_GROUPREAD, message.getBody().length(), -1, message.getBody())
                     .sendToTarget();
-            /*
-            MucHistory mh = new MucHistory();
-            mh.setUserAccount(account);
-            String from = StringUtils.parseResource(message.getFrom());
-            String fromRoomName = StringUtils.parseName(message.getFrom());
-            mh.setMhRoomName(fromRoomName);
-            mh.setFriendAccount(from);
-            mh.setMhInfo(message.getBody());
-            mh.setMhTime(time);
-            mh.setMhType("left");*/
+
         }
     }
 

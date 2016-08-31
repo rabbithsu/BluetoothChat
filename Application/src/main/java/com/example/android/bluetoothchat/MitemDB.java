@@ -16,7 +16,9 @@ import com.example.android.common.logger.Log;
 
 
 public class MitemDB {
-    public static final String TABLE_NAME = "item";
+    public static final String TABLE_NAME = Constants.ChatTableName;
+    public static final String GTABLE_NAME = Constants.GroupTableName;
+
 
     // 編號表格欄位名稱，固定不變
     public static final String KEY_ID = "_id";
@@ -27,12 +29,23 @@ public class MitemDB {
     //public static final String TITLE_COLUMN = "title";
     public static final String NAME_COLUMN = "name";
     public static final String CONTENT_COLUMN = "content";
+    public static final String GROUP_COLUMN = "groupname";
     //public static final String FILENAME_COLUMN = "filename";
     //public static final String LATITUDE_COLUMN = "latitude";
     //public static final String LONGITUDE_COLUMN = "longitude";
     //public static final String LASTMODIFY_COLUMN = "lastmodify";
 
     // 使用上面宣告的變數建立表格的SQL指令
+    public static final String CREATE_GROUPTABLE =
+            "CREATE TABLE " + GTABLE_NAME + " (" +
+                    KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    DATETIME_COLUMN + " REAL NOT NULL, " +
+                    TYPE_COLUMN + " INTEGER NOT NULL, " +
+                    NAME_COLUMN + " TEXT, " +
+                    CONTENT_COLUMN + " TEXT NOT NULL, " +
+                    GROUP_COLUMN + " TEXT NOT NULL)";
+
+
     public static final String CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -40,6 +53,7 @@ public class MitemDB {
                     TYPE_COLUMN + " INTEGER NOT NULL, " +
                     NAME_COLUMN + " TEXT, " +
                     CONTENT_COLUMN + " TEXT NOT NULL)";
+
 
     // 資料庫物件
     private SQLiteDatabase db;
@@ -77,6 +91,33 @@ public class MitemDB {
         item.setId(id);
         // 回傳結果
         return item;
+        //return null;
+    }
+
+    public CheckMessage ginsert(CheckMessage item) {
+        // 建立準備新增資料的ContentValues物件
+        ContentValues cv = new ContentValues();
+
+        // 加入ContentValues物件包裝的新增資料
+        // 第一個參數是欄位名稱， 第二個參數是欄位的資料
+        cv.put(DATETIME_COLUMN, item.getTime());
+        cv.put(TYPE_COLUMN, item.getType());
+        cv.put(NAME_COLUMN, item.getName());
+        cv.put(CONTENT_COLUMN, item.getContent());
+        cv.put(GROUP_COLUMN, item.getGroupName());
+
+
+        // 新增一筆資料並取得編號
+        // 第一個參數是表格名稱
+        // 第二個參數是沒有指定欄位值的預設值
+        // 第三個參數是包裝新增資料的ContentValues物件
+        long id = db.insert(GTABLE_NAME, null, cv);
+
+        // 設定編號
+        item.setId(id);
+        // 回傳結果
+        return item;
+        //return null;
     }
 
     // 修改參數指定的物件
@@ -113,6 +154,20 @@ public class MitemDB {
         //Cursor cursor = db.query(
         //        TABLE_NAME, null, null, null, null, null, null, null);
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME+" ORDER BY datetime ASC", null);
+
+        while (cursor.moveToNext()) {
+            result.add(getRecord(cursor));
+        }
+
+        cursor.close();
+        return result;
+    }
+
+    public ArrayList<CheckMessage> getUser(String name) {
+        ArrayList<CheckMessage> result = new ArrayList<>();
+        //Cursor cursor = db.query(
+        //        TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME+" WHERE name='" + name + "' ORDER BY datetime ASC", null);
 
         while (cursor.moveToNext()) {
             result.add(getRecord(cursor));

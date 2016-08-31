@@ -24,12 +24,15 @@ public class MyDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(MitemDB.CREATE_TABLE);
+        db.execSQL(MitemDB.CREATE_GROUPTABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // 刪除原有的表格
         db.execSQL("DROP TABLE IF EXISTS " + MitemDB.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MitemDB.GTABLE_NAME);
+
         // 呼叫onCreate建立新版的表格
         onCreate(db);
     }
