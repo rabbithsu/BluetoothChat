@@ -134,7 +134,7 @@ public class MessageHandler extends Service {
                         NotificationCompat.Builder builder = new NotificationCompat.Builder(C);
 
                         Intent serverIntent = new Intent(C, ChatWindows.class);
-                        serverIntent.putExtra("account", notiname+"@140.119.168.18");
+                        serverIntent.putExtra("account", notiname+"@140.119.164.18");
                         serverIntent.putExtra("username", username);
                         int flags = PendingIntent.FLAG_CANCEL_CURRENT;
                         PendingIntent pendingIntent = PendingIntent.getActivity(C, 1, serverIntent, flags);
@@ -219,7 +219,7 @@ public class MessageHandler extends Service {
                         NotificationCompat.Builder builder = new NotificationCompat.Builder(C);
 
                         Intent serverIntent = new Intent(C, ChatWindows.class);
-                        serverIntent.putExtra("account", grname+ "@conferrence.140.119.168.18");
+                        serverIntent.putExtra("account", grname+ "@conferrence.140.119.164.18");
                         serverIntent.putExtra("username", username);
                         int flags = PendingIntent.FLAG_CANCEL_CURRENT;
                         PendingIntent pendingIntent = PendingIntent.getActivity(C, 1, serverIntent, flags);

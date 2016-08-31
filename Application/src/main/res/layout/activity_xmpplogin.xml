@@ -10,7 +10,7 @@
         android:hint="@string/user"
         android:ems="10"
         android:id="@+id/editText"
-        android:text="user1"
+        android:text="user2"
         android:layout_gravity="center_horizontal" />
 
     <EditText
@@ -28,7 +28,7 @@
         android:inputType="textPersonName"
         android:ems="10"
         android:id="@+id/editText3"
-        android:text="user1"
+        android:text="user2"
         android:layout_gravity="center_horizontal" />
 
     <Button
